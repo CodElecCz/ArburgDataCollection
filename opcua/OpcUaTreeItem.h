@@ -48,8 +48,8 @@
 **
 ****************************************************************************/
 
-#ifndef TREEITEM_H
-#define TREEITEM_H
+#ifndef OPCUA_TREEITEM_H
+#define OPCUA_TREEITEM_H
 
 #include <QObject>
 #include <QOpcUaNode>
@@ -61,22 +61,22 @@ class OpcUaModel;
 class QOpcUaRange;
 class QOpcUaEUInformation;
 
-class TreeItem : public QObject
+class OpcUaTreeItem : public QObject
 {
     Q_OBJECT
 public:
-    explicit TreeItem(OpcUaModel *model);
-    TreeItem(QOpcUaNode *node, OpcUaModel *model, TreeItem *parent);
-    TreeItem(QOpcUaNode *node, OpcUaModel *model, const QOpcUaReferenceDescription &browsingData, TreeItem *parent);
-    ~TreeItem();
-    TreeItem *child(int row);
-    int childIndex(const TreeItem *child) const;
+    explicit OpcUaTreeItem(OpcUaModel *model);
+    OpcUaTreeItem(QOpcUaNode *node, OpcUaModel *model, OpcUaTreeItem *parent);
+    OpcUaTreeItem(QOpcUaNode *node, OpcUaModel *model, const QOpcUaReferenceDescription &browsingData, OpcUaTreeItem *parent);
+    ~OpcUaTreeItem();
+    OpcUaTreeItem *child(int row);
+    int childIndex(const OpcUaTreeItem *child) const;
     int childCount();
     int columnCount() const;
     QVariant data(int column);
     int row() const;
-    TreeItem *parentItem();
-    void appendChild(TreeItem *child);
+    OpcUaTreeItem *parentItem();
+    void appendChild(OpcUaTreeItem *child);
     QPixmap icon(int column) const;
     bool hasChildNodeItem(const QString &nodeId) const;
 
@@ -97,9 +97,9 @@ private:
     OpcUaModel *mModel = nullptr;
     bool mAttributesReady = false;
     bool mBrowseStarted = false;
-    QList<TreeItem *> mChildItems;
+    QList<OpcUaTreeItem *> mChildItems;
     QSet<QString> mChildNodeIds;
-    TreeItem *mParentItem = nullptr;
+    OpcUaTreeItem *mParentItem = nullptr;
 
 private:
     QString mNodeBrowseName;
@@ -109,7 +109,7 @@ private:
 };
 
 template <typename T>
-QString TreeItem::numberArrayToString(const QVector<T> &vec) const
+QString OpcUaTreeItem::numberArrayToString(const QVector<T> &vec) const
 {
     QString list(QLatin1Char('['));
     for (int i = 0, size = vec.size(); i < size; ++i) {
@@ -123,4 +123,4 @@ QString TreeItem::numberArrayToString(const QVector<T> &vec) const
 
 QT_END_NAMESPACE
 
-#endif // TREEITEM_H
+#endif // OPCUA_TREEITEM_H

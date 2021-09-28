@@ -1,6 +1,7 @@
 #include "OpcUaView.h"
 #include "OpcUaModel.h"
 #include "certificate/certificatedialog.h"
+#include "settings/Settings.h"
 
 #include "ui_OpcUaView.h"
 
@@ -15,6 +16,7 @@
 
 namespace
 {
+    const QString cOpcUaPlugin = "open62541";
     const QString cHostUrl = "opc.tcp://localhost:48040";
     const QString cServerUrl = "opc.tcp://192.168.11.111:4880/Arburg";
 }
@@ -35,8 +37,14 @@ OpcUaView::OpcUaView(const QString &initialUrl, QWidget *parent) :
 
     QStringList backendList = QOpcUaProvider::availableBackends();
     if (backendList.count() == 0)
-    {
+    {        
         QMessageBox::critical(this, tr("No OPCUA plugins available"), tr("The list of available OPCUA plugins is empty. No connection possible."));
+
+        qCritical() << "No OPCUA plugins available";
+    }
+    else
+    {
+        qInfo() << "OPCUA Plugin found: " << backendList;
     }
 
     setupPkiConfiguration();
@@ -48,7 +56,9 @@ OpcUaView::OpcUaView(const QString &initialUrl, QWidget *parent) :
 
 OpcUaView::~OpcUaView()
 {
-
+    delete ui;
+    delete mOpcUaModel;
+    delete mOpcUaProvider;
 }
 
 //! [PKI Configuration]
@@ -75,10 +85,10 @@ void OpcUaView::createClient()
 {
     if (mOpcUaClient == nullptr)
     {
-        mOpcUaClient = mOpcUaProvider->createClient(ui->server->text());
+        mOpcUaClient = mOpcUaProvider->createClient(cOpcUaPlugin);
         if (!mOpcUaClient)
         {
-            qCritical() << "Connecting to the given sever failed.";
+            qCritical() << "Connecting to the given sever failed";
             return;
         }
 
@@ -180,6 +190,10 @@ void OpcUaView::getEndpointsComplete(const QVector<QOpcUaEndpointDescription> &e
                 index++;
             }
         }
+    }
+    else //error
+    {
+        emit statusMessage(MessageType::Error, tr("No connection to OPC UA server"));
     }
 }
 

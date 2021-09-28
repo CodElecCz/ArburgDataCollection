@@ -42,7 +42,7 @@ private slots:
     void toolBarButtons_buttonClicked(int);
 
     void browserView_statusMessage(int type, const QString &message);
-    void fileView_statusMessage(int type, const QString &message);
+    void opcuaView_statusMessage(int type, const QString &message);
 
 private:
     Ui::MainWindow* ui;
@@ -59,7 +59,7 @@ private:
     CentralView::EView  m_lastView;
 
     StatusIndicator*    m_statusDbs;
-    StatusIndicator*    m_statusFile;
+    StatusIndicator*    m_statusOpcua;
 };
 
 #endif // MAINWINDOW_H

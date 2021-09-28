@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_lastView(CentralView::EView_none),    
 
     m_statusDbs(new StatusIndicator("Database", Qt::green, this)),
-    m_statusFile(new StatusIndicator("FileCheck", Qt::green, this))
+    m_statusOpcua(new StatusIndicator("OpcUa", Qt::green, this))
 {
     ui->setupUi(this);
 
@@ -83,8 +83,8 @@ void MainWindow::initializeStatusBar()
     ui->statusbar->addPermanentWidget(m_statusDbs);
     m_statusDbs->setMsg(cStatusDisconnect);
 
-    ui->statusbar->addPermanentWidget(m_statusFile);
-    m_statusFile->setMsg(cStatusDisabled);
+    ui->statusbar->addPermanentWidget(m_statusOpcua);
+    m_statusOpcua->setMsg(cStatusDisabled);
 }
 
 void MainWindow::initializeToolBar()
@@ -92,7 +92,7 @@ void MainWindow::initializeToolBar()
     //toolBar
     QToolButton* fileManagerButton = new QToolButton(ui->toolbar);
     fileManagerButton->setAccessibleName("FileManager");
-    fileManagerButton->setText("File\nManager");
+    fileManagerButton->setText("OPC UA\nClient");
     fileManagerButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     fileManagerButton->setToolTip(tr("File Manager View"));
     fileManagerButton->setCheckable(true);
@@ -230,6 +230,8 @@ void MainWindow::initializeOdbc()
 
 void MainWindow::initializeOpcua()
 {
+    connect(m_opcuaView, SIGNAL(statusMessage(int, const QString &)), this, SLOT(opcuaView_statusMessage(int, const QString &)));
+
     m_opcuaView->getEndpoints();
 }
 
@@ -277,44 +279,44 @@ void MainWindow::browserView_statusMessage(int type, const QString &msg)
     }
 };
 
-void MainWindow::fileView_statusMessage(int type, const QString &msg)
+void MainWindow::opcuaView_statusMessage(int type, const QString &msg)
 {
     ui->statusbar->showMessage(msg);
-    m_statusFile->setToolTip(msg);
+    m_statusOpcua->setToolTip(msg);
 
     MessageType msgType = static_cast<MessageType>(type);
 
     switch(msgType)
     {
     case MessageType::Info:
-        m_statusFile->setOn(true);
-        m_statusFile->setMsg(cStatusConnect, Qt::green);
+        m_statusOpcua->setOn(true);
+        m_statusOpcua->setMsg(cStatusConnect, Qt::green);
 
         qInfo().noquote() << msg;
         break;
     case MessageType::Warning:
-        m_statusFile->setOn(true);
-        m_statusFile->setMsg(cStatusWarning, Qt::yellow);
+        m_statusOpcua->setOn(true);
+        m_statusOpcua->setMsg(cStatusWarning, Qt::yellow);
 
         qWarning().noquote() << msg;
         break;
     case MessageType::Error:
-        m_statusFile->setOn(true);
-        m_statusFile->setMsg(cStatusError, Qt::red);
+        m_statusOpcua->setOn(true);
+        m_statusOpcua->setMsg(cStatusError, Qt::red);
 
         qCritical().noquote() << msg;
         break;
     case MessageType::Connect:
     case MessageType::Enable:
-        m_statusFile->setOn(true);
-        m_statusFile->setMsg(cStatusEnabled, Qt::green);
+        m_statusOpcua->setOn(true);
+        m_statusOpcua->setMsg(cStatusEnabled, Qt::green);
 
         qInfo().noquote() << msg;
         break;
     case MessageType::Disconnect:
     case MessageType::Disable:
-        m_statusFile->setOn(false);
-        m_statusFile->setMsg(cStatusDisabled);
+        m_statusOpcua->setOn(false);
+        m_statusOpcua->setMsg(cStatusDisabled);
 
         qInfo().noquote() << msg;
         break;

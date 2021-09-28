@@ -65,7 +65,7 @@ void OpcUaModel::setOpcUaClient(QOpcUaClient *client)
     beginResetModel();
     mOpcUaClient = client;
     if (mOpcUaClient)
-        mRootItem.reset(new TreeItem(client->node("ns=0;i=84"), this /* model */, nullptr /* parent */));
+        mRootItem.reset(new OpcUaTreeItem(client->node("ns=0;i=84"), this /* model */, nullptr /* parent */));
     else
         mRootItem.reset(nullptr);
     endResetModel();
@@ -81,7 +81,7 @@ QVariant OpcUaModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    auto item = static_cast<TreeItem *>(index.internalPointer());
+    auto item = static_cast<OpcUaTreeItem *>(index.internalPointer());
 
     switch (role) {
     case Qt::DisplayRole:
@@ -131,8 +131,8 @@ QModelIndex OpcUaModel::index(int row, int column, const QModelIndex &parent) co
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
-    TreeItem *item = parent.isValid()
-        ? static_cast<TreeItem*>(parent.internalPointer())->child(row)
+    OpcUaTreeItem *item = parent.isValid()
+        ? static_cast<OpcUaTreeItem*>(parent.internalPointer())->child(row)
         : mRootItem.get();
 
     return item ? createIndex(row, column, item) : QModelIndex();
@@ -143,7 +143,7 @@ QModelIndex OpcUaModel::parent(const QModelIndex &index) const
     if (!index.isValid())
         return QModelIndex();
 
-    auto childItem = static_cast<TreeItem*>(index.internalPointer());
+    auto childItem = static_cast<OpcUaTreeItem*>(index.internalPointer());
     auto parentItem = childItem->parentItem();
 
     if (childItem == mRootItem.get() || !parentItem)
@@ -164,14 +164,14 @@ int OpcUaModel::rowCount(const QModelIndex &parent) const
     if (!parent.isValid())
         return 1; // only one root item
 
-    auto parentItem = static_cast<TreeItem*>(parent.internalPointer());
+    auto parentItem = static_cast<OpcUaTreeItem*>(parent.internalPointer());
     return parentItem ? parentItem->childCount() : 0;
 }
 
 int OpcUaModel::columnCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
-        return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
+        return static_cast<OpcUaTreeItem*>(parent.internalPointer())->columnCount();
     return mRootItem ? mRootItem->columnCount() : 0;
 }
 

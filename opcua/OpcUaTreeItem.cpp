@@ -68,18 +68,18 @@ QT_BEGIN_NAMESPACE
 
 const int numberOfDisplayColumns = 7; // NodeId, Value, NodeClass, DataType, BrowseName, DisplayName, Description
 
-TreeItem::TreeItem(OpcUaModel *model) : QObject(nullptr)
+OpcUaTreeItem::OpcUaTreeItem(OpcUaModel *model) : QObject(nullptr)
   , mModel(model)
 {
 }
 
-TreeItem::TreeItem(QOpcUaNode *node, OpcUaModel *model, TreeItem *parent) : QObject(parent)
+OpcUaTreeItem::OpcUaTreeItem(QOpcUaNode *node, OpcUaModel *model, OpcUaTreeItem *parent) : QObject(parent)
   , mOpcNode(node)
   , mModel(model)
   , mParentItem(parent)
 {
-    connect(mOpcNode.get(), &QOpcUaNode::attributeRead, this, &TreeItem::handleAttributes);
-    connect(mOpcNode.get(), &QOpcUaNode::browseFinished, this, &TreeItem::browseFinished);
+    connect(mOpcNode.get(), &QOpcUaNode::attributeRead, this, &OpcUaTreeItem::handleAttributes);
+    connect(mOpcNode.get(), &QOpcUaNode::browseFinished, this, &OpcUaTreeItem::browseFinished);
 
     if (!mOpcNode->readAttributes( QOpcUa::NodeAttribute::Value
                             | QOpcUa::NodeAttribute::NodeClass
@@ -91,7 +91,7 @@ TreeItem::TreeItem(QOpcUaNode *node, OpcUaModel *model, TreeItem *parent) : QObj
         qWarning() << "Reading attributes" << mOpcNode->nodeId() << "failed";
 }
 
-TreeItem::TreeItem(QOpcUaNode *node, OpcUaModel *model, const QOpcUaReferenceDescription &browsingData, TreeItem *parent) : TreeItem(node, model, parent)
+OpcUaTreeItem::OpcUaTreeItem(QOpcUaNode *node, OpcUaModel *model, const QOpcUaReferenceDescription &browsingData, OpcUaTreeItem *parent) : OpcUaTreeItem(node, model, parent)
 {
     mNodeBrowseName = browsingData.browseName().name();
     mNodeClass = browsingData.nodeClass();
@@ -99,35 +99,35 @@ TreeItem::TreeItem(QOpcUaNode *node, OpcUaModel *model, const QOpcUaReferenceDes
     mNodeDisplayName = browsingData.displayName().text();
 }
 
-TreeItem::~TreeItem()
+OpcUaTreeItem::~OpcUaTreeItem()
 {
     qDeleteAll(mChildItems);
 }
 
-TreeItem *TreeItem::child(int row)
+OpcUaTreeItem *OpcUaTreeItem::child(int row)
 {
     if (row >= mChildItems.size())
-        qCritical() << "TreeItem in row" << row << "does not exist.";
+        qCritical() << "OpcUaTreeItem in row" << row << "does not exist.";
     return mChildItems[row];
 }
 
-int TreeItem::childIndex(const TreeItem *child) const
+int OpcUaTreeItem::childIndex(const OpcUaTreeItem *child) const
 {
-    return mChildItems.indexOf(const_cast<TreeItem *>(child));
+    return mChildItems.indexOf(const_cast<OpcUaTreeItem *>(child));
 }
 
-int TreeItem::childCount()
+int OpcUaTreeItem::childCount()
 {
     startBrowsing();
     return mChildItems.size();
 }
 
-int TreeItem::columnCount() const
+int OpcUaTreeItem::columnCount() const
 {
     return numberOfDisplayColumns;
 }
 
-QVariant TreeItem::data(int column)
+QVariant OpcUaTreeItem::data(int column)
 {
     if (column == 0)
         return mNodeBrowseName;
@@ -167,19 +167,19 @@ QVariant TreeItem::data(int column)
     return QVariant();
 }
 
-int TreeItem::row() const
+int OpcUaTreeItem::row() const
 {
     if (!mParentItem)
         return 0;
     return mParentItem->childIndex(this);
 }
 
-TreeItem *TreeItem::parentItem()
+OpcUaTreeItem *OpcUaTreeItem::parentItem()
 {
     return mParentItem;
 }
 
-void TreeItem::appendChild(TreeItem *child)
+void OpcUaTreeItem::appendChild(OpcUaTreeItem *child)
 {
     if (!child)
         return;
@@ -199,7 +199,7 @@ static QPixmap createPixmap(const QColor &c)
     return p;
 }
 
-QPixmap TreeItem::icon(int column) const
+QPixmap OpcUaTreeItem::icon(int column) const
 {
     if (column != 0 || !mOpcNode)
         return QPixmap();
@@ -223,12 +223,12 @@ QPixmap TreeItem::icon(int column) const
     return defaultPixmap;
 }
 
-bool TreeItem::hasChildNodeItem(const QString &nodeId) const
+bool OpcUaTreeItem::hasChildNodeItem(const QString &nodeId) const
 {
     return mChildNodeIds.contains(nodeId);
 }
 
-void TreeItem::startBrowsing()
+void OpcUaTreeItem::startBrowsing()
 {
     if (mBrowseStarted)
         return;
@@ -239,7 +239,7 @@ void TreeItem::startBrowsing()
         mBrowseStarted = true;
 }
 
-void TreeItem::handleAttributes(QOpcUa::NodeAttributes attr)
+void OpcUaTreeItem::handleAttributes(QOpcUa::NodeAttributes attr)
 {
     if (attr & QOpcUa::NodeAttribute::NodeClass)
         mNodeClass = mOpcNode->attribute(QOpcUa::NodeAttribute::NodeClass).value<QOpcUa::NodeClass>();
@@ -252,7 +252,7 @@ void TreeItem::handleAttributes(QOpcUa::NodeAttributes attr)
     emit mModel->dataChanged(mModel->createIndex(row(), 0, this), mModel->createIndex(row(), numberOfDisplayColumns - 1, this));
 }
 
-void TreeItem::browseFinished(const QVector<QOpcUaReferenceDescription> &children, QOpcUa::UaStatusCode statusCode)
+void OpcUaTreeItem::browseFinished(const QVector<QOpcUaReferenceDescription> &children, QOpcUa::UaStatusCode statusCode)
 {
     if (statusCode != QOpcUa::Good) {
         qWarning() << "Browsing node" << mOpcNode->nodeId() << "finally failed:" << statusCode;
@@ -272,14 +272,14 @@ void TreeItem::browseFinished(const QVector<QOpcUaReferenceDescription> &childre
         }
 
         mModel->beginInsertRows(index, mChildItems.size(), mChildItems.size() + 1);
-        appendChild(new TreeItem(node, mModel, item, this));
+        appendChild(new OpcUaTreeItem(node, mModel, item, this));
         mModel->endInsertRows();
     }
 
     emit mModel->dataChanged(mModel->createIndex(row(), 0, this), mModel->createIndex(row(), numberOfDisplayColumns - 1, this));
 }
 
-QString TreeItem::variantToString(const QVariant &value, const QString &typeNodeId) const
+QString OpcUaTreeItem::variantToString(const QVariant &value, const QString &typeNodeId) const
 {
     if (value.type() == QVariant::List) {
         const auto list = value.toList();
@@ -369,17 +369,17 @@ QString TreeItem::variantToString(const QVariant &value, const QString &typeNode
     return QString();
 }
 
-QString TreeItem::localizedTextToString(const QOpcUaLocalizedText &text) const
+QString OpcUaTreeItem::localizedTextToString(const QOpcUaLocalizedText &text) const
 {
     return QStringLiteral("[Locale: \"%1\", Text: \"%2\"]").arg(text.locale()).arg(text.text());
 }
 
-QString TreeItem::rangeToString(const QOpcUaRange &range) const
+QString OpcUaTreeItem::rangeToString(const QOpcUaRange &range) const
 {
     return QStringLiteral("[Low: %1, High: %2]").arg(range.low()).arg(range.high());
 }
 
-QString TreeItem::euInformationToString(const QOpcUaEUInformation &info) const
+QString OpcUaTreeItem::euInformationToString(const QOpcUaEUInformation &info) const
 {
     return QStringLiteral("[UnitId: %1, NamespaceUri: \"%2\", DisplayName: %3, Description: %4]").arg(info.unitId()).arg(
                 info.namespaceUri()).arg(localizedTextToString(info.displayName())).arg(localizedTextToString(info.description()));

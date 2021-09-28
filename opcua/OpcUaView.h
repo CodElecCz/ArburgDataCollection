@@ -25,6 +25,9 @@ public:
     void getEndpoints();
     void connectToServer();
 
+signals:
+    void statusMessage(int type, const QString &message);
+
 private slots:        
     void findServersComplete(const QVector<QOpcUaApplicationDescription> &servers, QOpcUa::UaStatusCode statusCode);   
     void getEndpointsComplete(const QVector<QOpcUaEndpointDescription> &endpoints, QOpcUa::UaStatusCode statusCode);

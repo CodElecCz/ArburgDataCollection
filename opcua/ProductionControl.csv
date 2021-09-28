@@ -1,0 +1,16 @@
+Display Name	Node Id	Value	Data Type	Server Timestamp	Source Timestamp	Status Code	Subscription	Session
+f052-Value	ns=2;i=412862	1020245	String	10/08/2021 12:54:10.000	10/08/2021 12:54:10.000	Good	Subscription0	Session0
+f052B-Value	ns=2;i=412872		String	10/08/2021 12:55:58.000	10/08/2021 12:55:58.000	Good	Subscription0	Session0
+f077-Value	ns=2;i=239002	2456	Int32	10/08/2021 13:02:31.000	10/08/2021 13:02:31.000	Good	Subscription0	Session0
+f087-Value	ns=2;i=239022	16	Int32	10/08/2021 12:56:57.000	10/08/2021 12:56:57.000	Good	Subscription0	Session0
+f9007I-Value	ns=2;i=238922	MATERIAL:ALCOM PA66 910/1 SLDS,084189                                          TOPENI FORMY:4x300`C                                                           DOBA SUSENI 4h80`C                                                             M-11160	String	10/08/2021 12:57:40.000	10/08/2021 12:57:40.000	Good	Subscription0	Session0
+t085-Value	ns=2;i=416422	29.84	Single	10/08/2021 13:01:03.000	10/08/2021 13:01:03.000	Good	Subscription0	Session0
+f071-Value	ns=2;i=238982	2534	Int32	10/08/2021 13:02:31.000	10/08/2021 13:02:31.000	Good	Subscription0	Session0
+f076-Value	ns=2;i=238992	0	Int32	10/08/2021 12:58:37.000	10/08/2021 12:58:37.000	Good	Subscription0	Session0
+t080-Value	ns=2;i=238962	0	Int32	10/08/2021 12:58:51.000	10/08/2021 12:58:51.000	Good	Subscription0	Session0
+t081-Value	ns=2;i=238972	0	Single	10/08/2021 12:58:59.000	10/08/2021 12:58:59.000	Good	Subscription0	Session0
+f095-Value	ns=2;i=239042	0	Int32	10/08/2021 12:59:07.000	10/08/2021 12:59:07.000	Good	Subscription0	Session0
+f075A-Value	ns=2;i=238952		String	10/08/2021 12:59:30.000	10/08/2021 12:59:30.000	Good	Subscription0	Session0
+f052-Value_L2	ns=2;i=412864		String	10/08/2021 12:59:47.000	10/08/2021 12:59:47.000	Good	Subscription0	Session0
+f052B-Value_L2	ns=2;i=412874		String	10/08/2021 12:59:58.000	10/08/2021 12:59:58.000	Good	Subscription0	Session0
+f075A-Value_L2	ns=2;i=238954		String	10/08/2021 13:00:07.000	10/08/2021 13:00:07.000	Good	Subscription0	Session0

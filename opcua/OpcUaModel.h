@@ -48,8 +48,8 @@
 **
 ****************************************************************************/
 
-#ifndef OPCUAMODEL_H
-#define OPCUAMODEL_H
+#ifndef OPCUA_MODEL_H
+#define OPCUA_MODEL_H
 
 #include "OpcUaTreeItem.h"
 #include <QAbstractItemModel>
@@ -59,11 +59,12 @@
 QT_BEGIN_NAMESPACE
 
 class QOpcUaClient;
-class TreeItem;
+class OpcUaTreeItem;
 
 class OpcUaModel : public QAbstractItemModel
 {
     Q_OBJECT
+
 public:
     OpcUaModel(QObject *parent = nullptr);
 
@@ -79,11 +80,11 @@ public:
 
 private:
     QOpcUaClient *mOpcUaClient = nullptr;
-    std::unique_ptr<TreeItem> mRootItem;
+    std::unique_ptr<OpcUaTreeItem> mRootItem;
 
-    friend class TreeItem;
+    friend class OpcUaTreeItem;
 };
 
 QT_END_NAMESPACE
 
-#endif // OPCUAMODEL_H
+#endif // OPCUA_MODEL_H
