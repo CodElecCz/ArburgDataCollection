@@ -44,8 +44,6 @@ OpcUaView::OpcUaView(const QString &initialUrl, QWidget *parent) :
     //! [Application Identity]
     m_identity = m_pkiConfig.applicationIdentity();
     //! [Application Identity]            
-
-    getEndpoints();
 }
 
 OpcUaView::~OpcUaView()
@@ -75,12 +73,12 @@ void OpcUaView::setupPkiConfiguration()
 
 void OpcUaView::createClient()
 {
-    if (mOpcUaClient == nullptr) {
+    if (mOpcUaClient == nullptr)
+    {
         mOpcUaClient = mOpcUaProvider->createClient(ui->server->text());
-        if (!mOpcUaClient) {
-            const QString message(tr("Connecting to the given sever failed. See the log for details."));
-            log(message, QString(), Qt::red);
-            QMessageBox::critical(this, tr("Failed to connect to server"), message);
+        if (!mOpcUaClient)
+        {
+            qCritical() << "Connecting to the given sever failed.";
             return;
         }
 
@@ -88,7 +86,8 @@ void OpcUaView::createClient()
         mOpcUaClient->setApplicationIdentity(m_identity);
         mOpcUaClient->setPkiConfiguration(m_pkiConfig);
 
-        if (mOpcUaClient->supportedUserTokenTypes().contains(QOpcUaUserTokenPolicy::TokenType::Certificate)) {
+        if (mOpcUaClient->supportedUserTokenTypes().contains(QOpcUaUserTokenPolicy::TokenType::Certificate))
+        {
             QOpcUaAuthenticationInformation authInfo;
             authInfo.setCertificateAuthentication();
             mOpcUaClient->setAuthenticationInformation(authInfo);
@@ -146,7 +145,10 @@ void OpcUaView::getEndpoints()
 {
     const QString serverUrl = ui->server->text();
     createClient();
-    mOpcUaClient->requestEndpoints(serverUrl);
+    if(mOpcUaClient)
+    {
+        mOpcUaClient->requestEndpoints(serverUrl);
+    }
 }
 
 void OpcUaView::getEndpointsComplete(const QVector<QOpcUaEndpointDescription> &endpoints, QOpcUa::UaStatusCode statusCode)
@@ -282,7 +284,8 @@ void OpcUaView::clientConnectError(QOpcUaErrorState *errorState)
     {
     case QOpcUaErrorState::ConnectionStep::Unknown:
         msg += tr("Failed with error 0x%1 (%2).").arg(errorState->errorCode(), 8, 16, QLatin1Char('0')).arg(statuscode);
-        QMessageBox::warning(this, tr("Connection Error"), msg);
+        //QMessageBox::warning(this, tr("Connection Error"), msg);
+        qWarning() << msg;
         break;
     case QOpcUaErrorState::ConnectionStep::CertificateValidation:
         {
@@ -295,15 +298,18 @@ void OpcUaView::clientConnectError(QOpcUaErrorState *errorState)
         break;
     case QOpcUaErrorState::ConnectionStep::OpenSecureChannel:
         msg += tr("OpenSecureChannel failed with error 0x%1 (%2).").arg(errorState->errorCode(), 8, 16, QLatin1Char('0')).arg(statuscode);
-        QMessageBox::warning(this, tr("Connection Error"), msg);
+        //QMessageBox::warning(this, tr("Connection Error"), msg);
+        qWarning() << msg;
         break;
     case QOpcUaErrorState::ConnectionStep::CreateSession:
         msg += tr("CreateSession failed with error 0x%1 (%2).").arg(errorState->errorCode(), 8, 16, QLatin1Char('0')).arg(statuscode);
-        QMessageBox::warning(this, tr("Connection Error"), msg);
+        //QMessageBox::warning(this, tr("Connection Error"), msg);
+        qWarning() << msg;
         break;
     case QOpcUaErrorState::ConnectionStep::ActivateSession:
         msg += tr("ActivateSession failed with error 0x%1 (%2).").arg(errorState->errorCode(), 8, 16, QLatin1Char('0')).arg(statuscode);
-        QMessageBox::warning(this, tr("Connection Error"), msg);
+        //QMessageBox::warning(this, tr("Connection Error"), msg);
+        qWarning() << msg;
         break;
     }
 }

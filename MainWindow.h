@@ -27,7 +27,8 @@ public:
     ~MainWindow();
 
 private:
-    void initializeConnection();
+    void initializeOdbc();
+    void initializeOpcua();
 
     void initializeMenuBar();
     void initializeToolBar();

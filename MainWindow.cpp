@@ -60,7 +60,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initializeWindow();
 
-    initializeConnection();   
+    initializeOdbc();
+    initializeOpcua();
 }
 
 MainWindow::~MainWindow()
@@ -180,10 +181,9 @@ void MainWindow::setView(CentralView::EView view)
     }
 }
 
-void MainWindow::initializeConnection()
+void MainWindow::initializeOdbc()
 {    
-    connect(m_browserView, SIGNAL(statusMessage(int, const QString &)), this, SLOT(browserView_statusMessage(int, const QString &)));
-    //connect(m_fileView, SIGNAL(statusMessage(int, const QString &)), this, SLOT(fileView_statusMessage(int, const QString &)));
+    connect(m_browserView, SIGNAL(statusMessage(int, const QString &)), this, SLOT(browserView_statusMessage(int, const QString &)));    
 
     //addConnectionsFromCommandline(app.arguments(), &browser);
     bool succeed = addConnectionsFromSettings(m_browserView);
@@ -226,6 +226,11 @@ void MainWindow::initializeConnection()
                                   Q_ARG(QString, pasword));
 #endif
     }          
+}
+
+void MainWindow::initializeOpcua()
+{
+    m_opcuaView->getEndpoints();
 }
 
 void MainWindow::browserView_statusMessage(int type, const QString &msg)

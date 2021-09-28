@@ -15,7 +15,7 @@ SOURCES += main.cpp \
     browser/QsqlConnectionDialog.cpp \
     log/Log.cpp \
     log/LogView.cpp \
-    MainWindow.cpp \     \
+    MainWindow.cpp \
     opcua/OpcUaView.cpp \
     opcua/certificate/certificatedialog.cpp \
     opcua/OpcUaModel.cpp \
@@ -35,7 +35,7 @@ HEADERS += \
     browser/QsqlConnectionDialog.h \
     log/Log.h \
     log/LogView.h \
-    MainWindow.h \     \
+    MainWindow.h \
     opcua/OpcUaView.h \
     opcua/certificate/certificatedialog.h \
     opcua/OpcUaModel.h \

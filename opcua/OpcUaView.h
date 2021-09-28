@@ -21,15 +21,12 @@ public:
     explicit OpcUaView(const QString &initialUrl, QWidget *parent = nullptr);
     ~OpcUaView();
 
-    Q_INVOKABLE void log(const QString &text, const QString &context, const QColor &color);
-    void log(const QString &text, const QColor &color = Qt::black);
-
-private slots:
-    void connectToServer();
     void findServers();
-    void findServersComplete(const QVector<QOpcUaApplicationDescription> &servers, QOpcUa::UaStatusCode statusCode);
-
     void getEndpoints();
+    void connectToServer();
+
+private slots:        
+    void findServersComplete(const QVector<QOpcUaApplicationDescription> &servers, QOpcUa::UaStatusCode statusCode);   
     void getEndpointsComplete(const QVector<QOpcUaEndpointDescription> &endpoints, QOpcUa::UaStatusCode statusCode);
 
     void clientConnected();
