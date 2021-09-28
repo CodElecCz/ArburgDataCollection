@@ -205,7 +205,7 @@ void MainWindow::createClient()
         }
 
         QOpcUaAuthenticationInformation authInfo;
-        authInfo.setUsernameAuthentication("user", "password");
+        authInfo.setUsernameAuthentication("host_computer", " ");
         mOpcUaClient->setAuthenticationInformation(authInfo);
 
         connect(mOpcUaClient, &QOpcUaClient::connected, this, &MainWindow::clientConnected);
