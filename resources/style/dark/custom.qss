@@ -1,0 +1,35 @@
+QToolButton[accessibleName="FileManager"] {
+    qproperty-icon:url(:/dark/custom/file-management.svg);
+    min-width: 55px;
+    padding: 2px;
+}
+
+QToolButton[accessibleName="DatabaseBrowser"] {
+    qproperty-icon:url(:/dark/custom/database.svg);
+    min-width: 55px;
+    padding: 2px;
+}
+
+QToolButton[accessibleName="Settings"] {
+    qproperty-icon:url(:/dark/custom/settings.svg);
+    min-width: 55px;
+    padding: 2px;
+}
+
+QToolButton[accessibleName="SaveSettings"] {
+    qproperty-icon:url(:/dark/custom/save.svg);
+    min-width: 55px;
+    padding: 2px;
+}
+
+QToolButton[accessibleName="CancelSettings"] {
+    qproperty-icon:url(:/dark/custom/reload.svg);
+    min-width: 55px;
+    padding: 2px;
+}
+
+QToolButton[accessibleName="FileCheck"] {
+    qproperty-icon:url(:/dark/custom/list.svg);
+    min-width: 55px;
+    padding: 2px;
+}

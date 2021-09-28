@@ -1,9 +1,9 @@
 /****************************************************************************
 **
-** Copyright (C) 2018 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing/
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
 **
-** This file is part of the examples of the Qt OPC UA module.
+** This file is part of the demonstration applications of the Qt Toolkit.
 **
 ** $QT_BEGIN_LICENSE:BSD$
 ** Commercial License Usage
@@ -48,26 +48,119 @@
 **
 ****************************************************************************/
 
-#include "mainwindow.h"
-#include <QApplication>
-#include <QCommandLineParser>
-#include <QCommandLineOption>
+#include "MainWindow.h"
+#include "settings/Settings.h"
+#include "log/Log.h"
 
-int main(int argc, char **argv)
+#include <QtCore>
+#include <QtWidgets>
+#include <QCoreApplication>
+#include <QDebug>
+
+// Get the default Qt message handler.
+static const QtMessageHandler QT_DEFAULT_MESSAGE_HANDLER = qInstallMessageHandler(0);
+
+void customMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    // Handle the messages!
+    QString dt = QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss");
+    QString stype;
+    switch (type)
+    {
+    case QtMsgType::QtInfoMsg:
+        stype = QString("Info");
+        break;
+    case QtMsgType::QtDebugMsg:
+        stype = QString("Debug");
+        break;
+    case QtMsgType::QtWarningMsg:
+        stype = QString("Warning");
+        break;
+    case QtMsgType::QtCriticalMsg:
+        stype = QString("Critical");
+        break;
+    case QtMsgType::QtFatalMsg:
+        stype = QString("Fatal");
+        break;
+    }
+
+    //to file
+    QFile file(Settings::logFilePath());
+    file.open(QIODevice::WriteOnly | QIODevice::Append);
+    QTextStream ts(&file);      
+
+    QString logMsg = QString("%1 [%2] %3").arg(dt).arg(stype).arg(msg);
+    ts << logMsg << endl;
+    file.close();
+
+    //to application
+    Log::instance().message(logMsg);
+
+    //check file size
+    QFileInfo fileInfo(Settings::logFilePath());
+    if(fileInfo.size()>1024*1024)
+    {
+        QStringList pathList = Settings::logFilePath().split(".");
+
+        QString suffix = pathList.last();
+        pathList.removeLast();
+
+        QFileInfo newFileInfo;
+
+        int index = 0;
+        do
+        {
+            newFileInfo.setFile(pathList.join(".") + "_" + QString::number(index,10) + "." + suffix);
+            index++;
+        }while(newFileInfo.exists());
+
+        file.rename(newFileInfo.absoluteFilePath());
+    }
+
+    // Call the default handler
+    (*QT_DEFAULT_MESSAGE_HANDLER)(type, context, msg);
+}
+
+
+int main(int argc, char *argv[])
+{   
+    int ret = 0;
+
+    QCoreApplication::setAttribute(Qt::AA_UseStyleSheetPropagationInWidgetStyles, true);
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling, true);
+
     QApplication app(argc, argv);
-    QCoreApplication::setApplicationVersion(QLatin1String(QT_VERSION_STR));
-    QCoreApplication::setApplicationName(QLatin1String("Qt OpcUa Viewer"));
 
-    QCommandLineParser parser;
-    parser.addHelpOption();
-    parser.addVersionOption();
-    parser.addPositionalArgument(QLatin1String("url"), QLatin1String("The url to open."));
-    parser.process(app);
+    qInstallMessageHandler(customMessageHandler);
 
-    const auto positionalArguments = parser.positionalArguments();
-    const auto initialUrl = positionalArguments.value(0, QLatin1String("opc.tcp://localhost:48010"));
-    MainWindow mainWindow(initialUrl.trimmed());
-    mainWindow.show();
-    return QCoreApplication::exec();
+    QCoreApplication::setOrganizationName(Settings::cOrganizationName);
+    QCoreApplication::setApplicationName(Settings::cApplicationName);
+    QCoreApplication::setApplicationVersion(Settings::cVersion);       
+
+    qInfo() << "Application start, ver: " << Settings::cVersion;
+
+    try
+    {
+        MainWindow mainWindow;
+        mainWindow.setWindowTitle(QString("%1 (%2)").arg(QCoreApplication::applicationName()).arg(QCoreApplication::applicationVersion()));
+        mainWindow.show();
+
+        app.exec();
+    }
+    catch (QException& e)
+    {
+        qCritical() << "Exception: " << e.what();
+
+        return EXIT_FAILURE;
+    }
+    catch(...)
+    {
+        qCritical() << "Unknown exception";
+
+        return EXIT_FAILURE;
+    }
+
+    qInfo() << "Application close, return code: " << ret;
+
+    return ret;
 }

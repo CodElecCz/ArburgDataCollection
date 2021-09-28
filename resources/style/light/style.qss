@@ -1,0 +1,6 @@
+QDockWidget::title{
+  padding:5px 2px 2px 2px;
+  background-color:qlineargradient(x1:0,y1:1,x2:0,y2:0,stop:0 rgba(205,205,205,127),stop:1 rgba(253,253,253,75));
+  border:1px solid rgba(125,125,125,75);
+  border-bottom:2px solid rgba(125,125,125,75);
+}

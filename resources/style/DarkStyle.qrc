@@ -1,0 +1,39 @@
+<RCC>
+    <qresource prefix="/">
+        <file>dark/style.qss</file>
+        <file>dark/custom.qss</file>
+        <file>dark/icon_close.png</file>
+        <file>dark/icon_restore.png</file>
+        <file>dark/icon_undock.png</file>
+        <file>dark/icon_branch_closed.png</file>
+        <file>dark/icon_branch_end.png</file>
+        <file>dark/icon_branch_more.png</file>
+        <file>dark/icon_branch_open.png</file>
+        <file>dark/icon_vline.png</file>
+        <file>dark/icon_checkbox_checked.png</file>
+        <file>dark/icon_checkbox_indeterminate.png</file>
+        <file>dark/icon_checkbox_unchecked.png</file>
+        <file>dark/icon_checkbox_checked_pressed.png</file>
+        <file>dark/icon_checkbox_indeterminate_pressed.png</file>
+        <file>dark/icon_checkbox_unchecked_pressed.png</file>
+        <file>dark/icon_checkbox_checked_disabled.png</file>
+        <file>dark/icon_checkbox_indeterminate_disabled.png</file>
+        <file>dark/icon_checkbox_unchecked_disabled.png</file>
+        <file>dark/icon_radiobutton_checked.png</file>
+        <file>dark/icon_radiobutton_unchecked.png</file>
+        <file>dark/icon_radiobutton_checked_pressed.png</file>
+        <file>dark/icon_radiobutton_unchecked_pressed.png</file>
+        <file>dark/icon_radiobutton_checked_disabled.png</file>
+        <file>dark/icon_radiobutton_unchecked_disabled.png</file>
+        <file>dark/icon_window_close.png</file>
+        <file>dark/icon_window_maximize.png</file>
+        <file>dark/icon_window_minimize.png</file>
+        <file>dark/icon_window_restore.png</file>
+        <file>dark/custom/settings.svg</file>
+        <file>dark/custom/file-management.svg</file>
+        <file>dark/custom/database.svg</file>
+        <file>dark/custom/save.svg</file>
+        <file>dark/custom/reload.svg</file>
+        <file>dark/custom/list.svg</file>
+    </qresource>
+</RCC>
