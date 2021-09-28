@@ -16,10 +16,10 @@ SOURCES += main.cpp \
     log/Log.cpp \
     log/LogView.cpp \
     MainWindow.cpp \     \
-    opcua/opcuaclient.cpp \
-    opcua/viewer/certificatedialog.cpp \
-    opcua/viewer/opcuamodel.cpp \
-    opcua/viewer/treeitem.cpp \
+    opcua/OpcUaView.cpp \
+    opcua/certificate/certificatedialog.cpp \
+    opcua/OpcUaModel.cpp \
+    opcua/OpcUaTreeItem.cpp \
     settings/Settings.cpp \
     settings/SettingsView.cpp \
     support/MainWindowExt.cpp \
@@ -36,10 +36,10 @@ HEADERS += \
     log/Log.h \
     log/LogView.h \
     MainWindow.h \     \
-    opcua/opcuaclient.h \
-    opcua/viewer/certificatedialog.h \
-    opcua/viewer/opcuamodel.h \
-    opcua/viewer/treeitem.h \
+    opcua/OpcUaView.h \
+    opcua/certificate/certificatedialog.h \
+    opcua/OpcUaModel.h \
+    opcua/OpcUaTreeItem.h \
     settings/Settings.h \
     settings/SettingsView.h \
     support/MainWindowExt.h \
@@ -54,8 +54,8 @@ FORMS += \
     browser/QsqlConnectionDialog.ui \
     log/LogView.ui \
     MainWindow.ui \
-    opcua/opcuaclient.ui \
-    opcua/viewer/certificatedialog.ui \
+    opcua/OpcUaView.ui \
+    opcua/certificate/certificatedialog.ui \
     settings/SettingsView.ui \
     support/about/AboutDialog.ui
 

@@ -1,5 +1,5 @@
-#ifndef OPCUA_CLIENT_H
-#define OPCUA_CLIENT_H
+#ifndef OPCUA_VIEW_H
+#define OPCUA_VIEW_H
 
 #include <QWidget>
 #include <QOpcUaClient>
@@ -10,16 +10,16 @@ class QOpcUaProvider;
 class OpcUaModel;
 
 namespace Ui {
-class OpcUaClient;
+class OpcUaView;
 }
 
-class OpcUaClient : public QWidget
+class OpcUaView : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit OpcUaClient(const QString &initialUrl, QWidget *parent = nullptr);
-    ~OpcUaClient();
+    explicit OpcUaView(const QString &initialUrl, QWidget *parent = nullptr);
+    ~OpcUaView();
 
     Q_INVOKABLE void log(const QString &text, const QString &context, const QColor &color);
     void log(const QString &text, const QColor &color = Qt::black);
@@ -49,7 +49,7 @@ private:
     bool createPkiPath(const QString &path);
 
 private:    
-    Ui::OpcUaClient*            ui;
+    Ui::OpcUaView*              ui;
     OpcUaModel*                 mOpcUaModel;
     QOpcUaProvider*             mOpcUaProvider;
     QOpcUaClient*               mOpcUaClient = nullptr;
@@ -62,4 +62,4 @@ private:
 
 QT_END_NAMESPACE
 
-#endif // OPCUA_CLIENT_H
+#endif // OPCUA_VIEW_H

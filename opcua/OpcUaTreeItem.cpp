@@ -48,8 +48,8 @@
 **
 ****************************************************************************/
 
-#include "treeitem.h"
-#include "opcuamodel.h"
+#include "OpcUaTreeItem.h"
+#include "OpcUaModel.h"
 #include <QOpcUaArgument>
 #include <QOpcUaAxisInformation>
 #include <QOpcUaClient>

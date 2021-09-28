@@ -13,7 +13,7 @@ class MainWindow;
 
 class BrowserView;
 class CentralView;
-//class FileView;
+class OpcUaView;
 class SettingsView;
 class StatusIndicator;
 class LogView;
@@ -47,7 +47,7 @@ private:
     Ui::MainWindow* ui;
 
     BrowserView*    m_browserView;
-    //FileView*       m_fileView;
+    OpcUaView*      m_opcuaView;
     SettingsView*   m_settingsView;
 
     CentralView*    m_centralView;

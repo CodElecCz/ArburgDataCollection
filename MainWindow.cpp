@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 #include "CentralView.h"
 #include "browser/BrowserView.h"
-//#include "file/FileView.h"
+#include "opcua/OpcUaView.h"
 #include "settings/SettingsView.h"
 #include "settings/Settings.h"
 #include "support/controls/StatusIndicator.h"
@@ -35,10 +35,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow),
 
     m_browserView(new BrowserView(this)),
-    //m_fileView(new FileView(this)),
+    m_opcuaView(new OpcUaView("", this)),
     m_settingsView(new SettingsView(this)),
 
-    m_centralView(new CentralView(m_browserView, nullptr, m_settingsView, this)),
+    m_centralView(new CentralView(m_browserView, m_opcuaView, m_settingsView, this)),
 
     m_logView(nullptr),
 
@@ -124,14 +124,14 @@ void MainWindow::initializeToolBar()
     ui->toolbar->addWidget(spacer);
     ui->toolbar->addWidget(settingsButton);
 
-    m_toolBarButtons->addButton(fileManagerButton, CentralView::EView_FileManager);
+    m_toolBarButtons->addButton(fileManagerButton, CentralView::EView_OpcUa);
     m_toolBarButtons->addButton(dbsBrowserButton, CentralView::EView_DatabaseBrowser);
     m_toolBarButtons->addButton(settingsButton, CentralView::EView_Settings);
     m_toolBarButtons->setExclusive(true);
 
     connect(m_toolBarButtons, SIGNAL(buttonClicked(int)), this, SLOT(toolBarButtons_buttonClicked(int)));
 
-    setView(CentralView::EView_FileManager);
+    setView(CentralView::EView_OpcUa);
 }
 
 void MainWindow::toolBarButtons_buttonClicked(int eView)
@@ -147,7 +147,7 @@ void MainWindow::setView(CentralView::EView view)
     {
         switch(m_lastView)
         {
-        case CentralView::EView_FileManager:
+        case CentralView::EView_OpcUa:
             break;
         case CentralView::EView_DatabaseBrowser:
             break;
@@ -167,7 +167,7 @@ void MainWindow::setView(CentralView::EView view)
     //open
     switch(view)
     {
-    case CentralView::EView_FileManager:
+    case CentralView::EView_OpcUa:
         break;
     case CentralView::EView_DatabaseBrowser:
         break;

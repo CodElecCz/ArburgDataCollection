@@ -1,8 +1,8 @@
-#include "opcuaclient.h"
-#include "viewer/opcuamodel.h"
-#include "viewer/certificatedialog.h"
+#include "OpcUaView.h"
+#include "OpcUaModel.h"
+#include "certificate/certificatedialog.h"
 
-#include "ui_opcuaclient.h"
+#include "ui_OpcUaView.h"
 
 #include <QApplication>
 #include <QDir>
@@ -21,9 +21,9 @@ namespace
 
 QT_BEGIN_NAMESPACE
 
-OpcUaClient::OpcUaClient(const QString &initialUrl, QWidget *parent) :
+OpcUaView::OpcUaView(const QString &initialUrl, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::OpcUaClient),
+    ui(new Ui::OpcUaView),
     mOpcUaModel(new OpcUaModel(this)),
     mOpcUaProvider(new QOpcUaProvider(this))
 {
@@ -48,13 +48,13 @@ OpcUaClient::OpcUaClient(const QString &initialUrl, QWidget *parent) :
     getEndpoints();
 }
 
-OpcUaClient::~OpcUaClient()
+OpcUaView::~OpcUaView()
 {
 
 }
 
 //! [PKI Configuration]
-void OpcUaClient::setupPkiConfiguration()
+void OpcUaView::setupPkiConfiguration()
 {
     QString pkidir = QCoreApplication::applicationDirPath();
 #ifdef Q_OS_WIN
@@ -73,7 +73,7 @@ void OpcUaClient::setupPkiConfiguration()
 }
 //! [PKI Configuration]
 
-void OpcUaClient::createClient()
+void OpcUaView::createClient()
 {
     if (mOpcUaClient == nullptr) {
         mOpcUaClient = mOpcUaProvider->createClient(ui->server->text());
@@ -84,7 +84,7 @@ void OpcUaClient::createClient()
             return;
         }
 
-        connect(mOpcUaClient, &QOpcUaClient::connectError, this, &OpcUaClient::clientConnectError);
+        connect(mOpcUaClient, &QOpcUaClient::connectError, this, &OpcUaView::clientConnectError);
         mOpcUaClient->setApplicationIdentity(m_identity);
         mOpcUaClient->setPkiConfiguration(m_pkiConfig);
 
@@ -98,16 +98,16 @@ void OpcUaClient::createClient()
         authInfo.setUsernameAuthentication("host_computer", " ");
         mOpcUaClient->setAuthenticationInformation(authInfo);
 
-        connect(mOpcUaClient, &QOpcUaClient::connected, this, &OpcUaClient::clientConnected);
-        connect(mOpcUaClient, &QOpcUaClient::disconnected, this, &OpcUaClient::clientDisconnected);
-        connect(mOpcUaClient, &QOpcUaClient::errorChanged, this, &OpcUaClient::clientError);
-        connect(mOpcUaClient, &QOpcUaClient::stateChanged, this, &OpcUaClient::clientState);
-        connect(mOpcUaClient, &QOpcUaClient::endpointsRequestFinished, this, &OpcUaClient::getEndpointsComplete);
-        connect(mOpcUaClient, &QOpcUaClient::findServersFinished, this, &OpcUaClient::findServersComplete);
+        connect(mOpcUaClient, &QOpcUaClient::connected, this, &OpcUaView::clientConnected);
+        connect(mOpcUaClient, &QOpcUaClient::disconnected, this, &OpcUaView::clientDisconnected);
+        connect(mOpcUaClient, &QOpcUaClient::errorChanged, this, &OpcUaView::clientError);
+        connect(mOpcUaClient, &QOpcUaClient::stateChanged, this, &OpcUaView::clientState);
+        connect(mOpcUaClient, &QOpcUaClient::endpointsRequestFinished, this, &OpcUaView::getEndpointsComplete);
+        connect(mOpcUaClient, &QOpcUaClient::findServersFinished, this, &OpcUaView::findServersComplete);
     }
 }
 
-void OpcUaClient::findServers()
+void OpcUaView::findServers()
 {
     QStringList localeIds;
     QStringList serverUris;
@@ -125,7 +125,7 @@ void OpcUaClient::findServers()
     }
 }
 
-void OpcUaClient::findServersComplete(const QVector<QOpcUaApplicationDescription> &servers, QOpcUa::UaStatusCode statusCode)
+void OpcUaView::findServersComplete(const QVector<QOpcUaApplicationDescription> &servers, QOpcUa::UaStatusCode statusCode)
 {
     QOpcUaApplicationDescription server;
 
@@ -142,14 +142,14 @@ void OpcUaClient::findServersComplete(const QVector<QOpcUaApplicationDescription
     }
 }
 
-void OpcUaClient::getEndpoints()
+void OpcUaView::getEndpoints()
 {
     const QString serverUrl = ui->server->text();
     createClient();
     mOpcUaClient->requestEndpoints(serverUrl);
 }
 
-void OpcUaClient::getEndpointsComplete(const QVector<QOpcUaEndpointDescription> &endpoints, QOpcUa::UaStatusCode statusCode)
+void OpcUaView::getEndpointsComplete(const QVector<QOpcUaEndpointDescription> &endpoints, QOpcUa::UaStatusCode statusCode)
 {
     int index = 0;
     const char *modes[] = {
@@ -181,7 +181,7 @@ void OpcUaClient::getEndpointsComplete(const QVector<QOpcUaEndpointDescription> 
     }
 }
 
-void OpcUaClient::connectToServer()
+void OpcUaView::connectToServer()
 {
     if (mClientConnected)
     {
@@ -197,15 +197,15 @@ void OpcUaClient::connectToServer()
     }
 }
 
-void OpcUaClient::clientConnected()
+void OpcUaView::clientConnected()
 {
     mClientConnected = true;    
 
-    connect(mOpcUaClient, &QOpcUaClient::namespaceArrayUpdated, this, &OpcUaClient::namespacesArrayUpdated);
+    connect(mOpcUaClient, &QOpcUaClient::namespaceArrayUpdated, this, &OpcUaView::namespacesArrayUpdated);
     mOpcUaClient->updateNamespaceArray();
 }
 
-void OpcUaClient::clientDisconnected()
+void OpcUaView::clientDisconnected()
 {
     mClientConnected = false;
     mOpcUaClient->deleteLater();
@@ -213,7 +213,7 @@ void OpcUaClient::clientDisconnected()
     mOpcUaModel->setOpcUaClient(nullptr);    
 }
 
-void OpcUaClient::namespacesArrayUpdated(const QStringList &namespaceArray)
+void OpcUaView::namespacesArrayUpdated(const QStringList &namespaceArray)
 {
     if (namespaceArray.isEmpty())
     {
@@ -221,21 +221,21 @@ void OpcUaClient::namespacesArrayUpdated(const QStringList &namespaceArray)
         return;
     }
 
-    disconnect(mOpcUaClient, &QOpcUaClient::namespaceArrayUpdated, this, &OpcUaClient::namespacesArrayUpdated);
+    disconnect(mOpcUaClient, &QOpcUaClient::namespaceArrayUpdated, this, &OpcUaView::namespacesArrayUpdated);
     mOpcUaModel->setOpcUaClient(mOpcUaClient);    
 }
 
-void OpcUaClient::clientError(QOpcUaClient::ClientError error)
+void OpcUaView::clientError(QOpcUaClient::ClientError error)
 {
     qDebug() << "Client error changed" << error;
 }
 
-void OpcUaClient::clientState(QOpcUaClient::ClientState state)
+void OpcUaView::clientState(QOpcUaClient::ClientState state)
 {
     qDebug() << "Client state changed" << state;
 }
 
-bool OpcUaClient::createPkiPath(const QString &path)
+bool OpcUaView::createPkiPath(const QString &path)
 {
     const QString msg = tr("Creating PKI path '%1': %2");
 
@@ -249,7 +249,7 @@ bool OpcUaClient::createPkiPath(const QString &path)
     return ret;
 }
 
-bool OpcUaClient::createPkiFolders()
+bool OpcUaView::createPkiFolders()
 {
     bool result = createPkiPath(m_pkiConfig.trustListDirectory());
     if (!result)
@@ -270,7 +270,7 @@ bool OpcUaClient::createPkiFolders()
     return result;
 }
 
-void OpcUaClient::clientConnectError(QOpcUaErrorState *errorState)
+void OpcUaView::clientConnectError(QOpcUaErrorState *errorState)
 {
     int result = 0;
 

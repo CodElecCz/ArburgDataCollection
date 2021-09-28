@@ -8,7 +8,7 @@ class CentralView;
 }
 
 class BrowserView;
-class FileView;
+class OpcUaView;
 class SettingsView;
 
 class CentralView : public QWidget
@@ -19,7 +19,7 @@ public:
     typedef enum _EView
     {
         EView_none = 0,
-        EView_FileManager,
+        EView_OpcUa,
         EView_DatabaseBrowser,
         EView_Settings,
 
@@ -28,7 +28,7 @@ public:
     } EView;
 
     explicit CentralView(BrowserView* browserView,
-                         FileView* fileView,
+                         OpcUaView* opcuaView,
                          SettingsView* settingsView,
                          QWidget *parent = nullptr);
     ~CentralView();

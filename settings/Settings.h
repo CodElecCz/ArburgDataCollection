@@ -21,7 +21,7 @@ public:
     Settings();
 
     static inline char const       cOrganizationName[] = "CodElec";
-    static inline char const       cApplicationName[] = "ENGEL DataCollection";
+    static inline char const       cApplicationName[] = "ARBURG DataCollection";
     static inline char const       cVersion[] = "v1.0.0";
 
     static QString iniFilePath();

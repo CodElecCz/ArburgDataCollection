@@ -51,7 +51,7 @@
 #ifndef OPCUAMODEL_H
 #define OPCUAMODEL_H
 
-#include "treeitem.h"
+#include "OpcUaTreeItem.h"
 #include <QAbstractItemModel>
 #include <QOpcUaNode>
 #include <memory>
