@@ -1,34 +1,73 @@
-QT += opcua
+QT += core gui sql opcua
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++17
 
-DEPENDPATH += INCLUDEPATH
+# You can make your code fail to compile if it uses deprecated APIs.
+# In order to do so, uncomment the following line.
+#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += main.cpp \
-    mainwindow.cpp \     \
+    CentralView.cpp \
+    browser/BrowserView.cpp \
+    browser/ConnectionWidget.cpp \
+    browser/QsqlConnectionDialog.cpp \
+    log/Log.cpp \
+    log/LogView.cpp \
+    MainWindow.cpp \     \
     opcua/opcuaclient.cpp \
     opcua/viewer/certificatedialog.cpp \
     opcua/viewer/opcuamodel.cpp \
-    opcua/viewer/treeitem.cpp
+    opcua/viewer/treeitem.cpp \
+    settings/Settings.cpp \
+    settings/SettingsView.cpp \
+    support/MainWindowExt.cpp \
+    support/controls/StatusIndicator.cpp \
+    support/controls/WaitingSpinner.cpp \
+    support/dialog/WaitDialog.cpp \
+    support/style/CustomStyle.cpp
 
 HEADERS += \
-    mainwindow.h \     \
+    CentralView.h \
+    browser/BrowserView.h \
+    browser/ConnectionWidget.h \
+    browser/QsqlConnectionDialog.h \
+    log/Log.h \
+    log/LogView.h \
+    MainWindow.h \     \
     opcua/opcuaclient.h \
     opcua/viewer/certificatedialog.h \
     opcua/viewer/opcuamodel.h \
-    opcua/viewer/treeitem.h
+    opcua/viewer/treeitem.h \
+    settings/Settings.h \
+    settings/SettingsView.h \
+    support/MainWindowExt.h \
+    support/controls/StatusIndicator.h \
+    support/controls/WaitingSpinner.h \
+    support/dialog/WaitDialog.h \
+    support/style/CustomStyle.h
 
 FORMS += \
-    mainwindow.ui \
+    CentralView.ui \
+    browser/BrowserView.ui \
+    browser/QsqlConnectionDialog.ui \
+    log/LogView.ui \
+    MainWindow.ui \
     opcua/opcuaclient.ui \
-    opcua/viewer/certificatedialog.ui
+    opcua/viewer/certificatedialog.ui \
+    settings/SettingsView.ui \
+    support/about/AboutDialog.ui
+
+RESOURCES += \
+    resources/style/DarkStyle.qrc \
+    resources/style/LightStyle.qrc \
+    resources/resource.qrc
+
+RC_FILE += \
+    resources/resource.rc
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-DISTFILES += \
-    opcua/viewer/opcuaviewer.png

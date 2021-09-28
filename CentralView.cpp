@@ -1,6 +1,6 @@
 #include "CentralView.h"
 #include "browser/BrowserView.h"
-#include "file/FileView.h"
+//#include "file/FileView.h"
 #include "settings/SettingsView.h"
 
 #include "ui_CentralView.h"
