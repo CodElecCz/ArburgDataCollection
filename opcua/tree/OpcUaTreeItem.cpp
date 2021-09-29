@@ -17,6 +17,9 @@
 
 QT_BEGIN_NAMESPACE
 
+#define COLUMN_NODECLASS    1
+#define COLUMN_VALUE        0
+
 const int numberOfDisplayColumns = 7; // NodeId, Value, NodeClass, DataType, BrowseName, DisplayName, Description
 
 OpcUaTreeItem::OpcUaTreeItem(OpcUaItemModel *model) :

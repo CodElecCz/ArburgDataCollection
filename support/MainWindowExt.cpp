@@ -299,10 +299,15 @@ bool MainWindowExt::closeDialog()
 
         hide();
 
-        QApplication::quit();
+        applicationQuit();
     }
 
     return (reply == QMessageBox::Yes);
+}
+
+void MainWindowExt::applicationQuit()
+{
+    QApplication::quit();
 }
 
 void MainWindowExt::readAppSettings()

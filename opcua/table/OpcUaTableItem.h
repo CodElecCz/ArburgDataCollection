@@ -17,13 +17,17 @@ class OpcUaTableItem : public QObject
 
 public:
     explicit OpcUaTableItem(OpcUaTableModel *model, QObject* parent = nullptr);
-    OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row, QObject* parent = nullptr);
+    OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row, bool changeEvent, QObject* parent = nullptr);
     ~OpcUaTableItem();
 
     QVariant data(int column);
 
+signals:
+    void dataChanged();
+
 private slots:    
-    void handleAttributes(QOpcUa::NodeAttributes attr);    
+    void handleAttributes(QOpcUa::NodeAttributes attr);
+    void timer_timeout();
 
 private:
     QString variantToString(const QVariant &value, const QString &typeNodeId = QString()) const;
@@ -38,10 +42,13 @@ private:
     OpcUaTableModel*            mModel = nullptr;
     int                         mRow = -1;
     bool                        mAttributesReady = false;
+    QTimer*                     mTimer = nullptr;
+    bool                        mChangeEvent = false;
 
     QString mNodeBrowseName;
     QString mNodeId;
     QString mNodeDisplayName;
+    QString mNodeValue;
     QDateTime mTimeStamp;
     QOpcUa::NodeClass mNodeClass = QOpcUa::NodeClass::Undefined;
 };

@@ -50,6 +50,8 @@ private:
     void tabifyLeftDockWidget(QDockWidget *dockwidget, const QString& title);
     void tabifyRightDockWidget(QDockWidget *dockwidget, const QString& title);    
 
+    virtual void applicationQuit();
+
 protected:
     void keyPressEvent(QKeyEvent *event) override;
     void closeEvent(QCloseEvent *event) override;

@@ -3,25 +3,35 @@
 
 #include <QOpcUaClient>
 #include <QOpcUaNode>
-#include <QIcon>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 
+typedef struct _SNode
+{
+    QString id;
+    bool    changeEvent;
+} SNode;
+
 namespace
 {
-const QStringList cNodeList = {
-    "ns=2;i=412862",
-    "ns=2;i=412872",
-    "ns=2;i=239002",
-    "ns=2;i=239022",
-    "ns=2;i=238922",
-    "ns=2;i=416422"
+const QList<SNode> cNodeList = {
+    {"ns=2;i=412862", false },
+    {"ns=2;i=412872", false },
+    {"ns=2;i=238922", false },
+    {"ns=2;i=416422", false },
+    {"ns=2;i=239002", true },
+    {"ns=2;i=239022", true }
 };
 }
 
 OpcUaTableModel::OpcUaTableModel(QObject *parent) :
-    QAbstractTableModel(parent)
+    QAbstractTableModel(parent),
+    mTimerChanged(new QTimer(this))
 {
+    mTimerChanged->setSingleShot(true);
+
+    connect(mTimerChanged, &QTimer::timeout, this, &OpcUaTableModel::timerChanged_timeout);
 }
 
 void OpcUaTableModel::setOpcUaClient(QOpcUaClient *client)
@@ -31,26 +41,25 @@ void OpcUaTableModel::setOpcUaClient(QOpcUaClient *client)
     if (mOpcUaClient)
     {
         int index = 0;
-        foreach(auto nodeId, cNodeList)
+        foreach(auto node, cNodeList)
         {
-            OpcUaTableItem* item = new OpcUaTableItem(client->node(nodeId), this, index, this);
+            OpcUaTableItem* item = new OpcUaTableItem(client->node(node.id), this, index, node.changeEvent, this);
             mNodeList.append(item);
             index++;
+
+            connect(item, &OpcUaTableItem::dataChanged, this, &OpcUaTableModel::item_dataChanged);
         }
     }
     else        
     {
-        foreach(auto node, mNodeList)
-        {
-            delete node;
-        }
+        qDeleteAll(mNodeList);
         mNodeList.clear();
     }
     endResetModel();
 }
 
 QOpcUaClient *OpcUaTableModel::opcUaClient() const
-{
+{    
     return mOpcUaClient;
 }
 
@@ -112,6 +121,29 @@ int OpcUaTableModel::rowCount(const QModelIndex &parent) const
 int OpcUaTableModel::columnCount(const QModelIndex &parent) const
 {
     return EColumn_Size;
+}
+
+void OpcUaTableModel::item_dataChanged()
+{
+    //hack: wait for all values complete
+    mTimerChanged->start(500);
+}
+
+void OpcUaTableModel::timerChanged_timeout()
+{
+    QStringList var;
+    QStringList data;
+    foreach(auto item, mNodeList)
+    {
+        QString v = item->data(EColumn_DisplayName).toString();
+        if(v.contains("-"))
+            v = v.split("-").at(0);
+
+        var.append(v);
+        data.append(item->data(EColumn_Value).toString());
+    }
+
+    emit itemChanged(var, data);
 }
 
 QT_END_NAMESPACE

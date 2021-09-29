@@ -13,11 +13,9 @@
 #include <QOpcUaRange>
 #include <QOpcUaXValue>
 #include <QMetaEnum>
-#include <QPixmap>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
-
-const int numberOfDisplayColumns = 7; // NodeId, Value, NodeClass, DataType, BrowseName, DisplayName, Description
 
 OpcUaTableItem::OpcUaTableItem(OpcUaTableModel *model, QObject* parent) :
     QObject(parent),
@@ -25,16 +23,31 @@ OpcUaTableItem::OpcUaTableItem(OpcUaTableModel *model, QObject* parent) :
 {
 }
 
-OpcUaTableItem::OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row, QObject* parent) :
+OpcUaTableItem::OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row, bool changeEvent, QObject* parent) :
     QObject(parent),
     mOpcNode(node),
     mModel(model),
-    mRow(row)
+    mRow(row),
+    mTimer(new QTimer(this)),
+    mChangeEvent(changeEvent)
 {    
     mNodeId = node->nodeId();
 
     connect(mOpcNode.get(), &QOpcUaNode::attributeRead, this, &OpcUaTableItem::handleAttributes);
+    connect(mTimer, &QTimer::timeout, this, &OpcUaTableItem::timer_timeout);
 
+    timer_timeout();
+    mTimer->setSingleShot(false);
+    mTimer->start(2000);
+}
+
+OpcUaTableItem::~OpcUaTableItem()
+{    
+    delete mTimer;
+}
+
+void OpcUaTableItem::timer_timeout()
+{
     if (!mOpcNode->readAttributes( QOpcUa::NodeAttribute::BrowseName
                             | QOpcUa::NodeAttribute::NodeClass
                             | QOpcUa::NodeAttribute::Description
@@ -47,12 +60,6 @@ OpcUaTableItem::OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row
     }
 }
 
-
-OpcUaTableItem::~OpcUaTableItem()
-{
-
-}
-
 QVariant OpcUaTableItem::data(int column)
 {
     switch(column)
@@ -60,15 +67,10 @@ QVariant OpcUaTableItem::data(int column)
     case OpcUaTableModel::EColumn::EColumn_BrowseName:
         return mNodeBrowseName;
     case OpcUaTableModel::EColumn::EColumn_Value:
-        {
-            if (!mAttributesReady)
-                return tr("Loading ...");
+        if (!mAttributesReady)
+            return tr("Loading ...");
 
-            const auto type = mOpcNode->attribute(QOpcUa::NodeAttribute::DataType).toString();
-            const auto value = mOpcNode->attribute(QOpcUa::NodeAttribute::Value);
-
-            return variantToString(value, type);
-        }
+        return mNodeValue;
     case OpcUaTableModel::EColumn::EColumn_NodeClass:
         {
             QMetaEnum metaEnum = QMetaEnum::fromType<QOpcUa::NodeClass>();
@@ -115,10 +117,27 @@ void OpcUaTableItem::handleAttributes(QOpcUa::NodeAttributes attr)
     if (attr & QOpcUa::NodeAttribute::DisplayName)
         mNodeDisplayName = mOpcNode->attribute(QOpcUa::NodeAttribute::DisplayName).value<QOpcUaLocalizedText>().text();
 
+    const auto type = mOpcNode->attribute(QOpcUa::NodeAttribute::DataType).toString();
+    const auto value = mOpcNode->attribute(QOpcUa::NodeAttribute::Value);
+
+    QString nodeValue = variantToString(value, type);
+    nodeValue = nodeValue.simplified();
+
     mTimeStamp = QDateTime::currentDateTime();
 
     mAttributesReady = true;
     emit mModel->dataChanged(mModel->createIndex(mRow, 0, this), mModel->createIndex(mRow, mModel->columnCount() - 1, this));
+
+    if(mChangeEvent)
+    {
+        if(nodeValue != mNodeValue)
+        {
+            mNodeValue = nodeValue;
+            emit dataChanged();
+        }
+    }
+    else
+        mNodeValue = nodeValue;
 }
 
 QString OpcUaTableItem::variantToString(const QVariant &value, const QString &typeNodeId) const

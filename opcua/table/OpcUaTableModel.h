@@ -40,9 +40,17 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
+signals:
+    void itemChanged(const QStringList& var, const QStringList& data);
+
+private slots:
+    void item_dataChanged();
+    void timerChanged_timeout();
+
 private:
-    QOpcUaClient*       mOpcUaClient = nullptr;
+    QOpcUaClient*           mOpcUaClient = nullptr;
     QList<OpcUaTableItem*>  mNodeList;
+    QTimer*                 mTimerChanged = nullptr;
 
     friend class OpcUaTableItem;
 };

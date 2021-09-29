@@ -20,16 +20,20 @@ class OpcUaView : public QWidget
     Q_OBJECT
 
 public:
-    explicit OpcUaView(const QString &initialUrl, QWidget *parent = nullptr);
+    explicit OpcUaView(const QString &serverUrl, QWidget *parent = nullptr);
     ~OpcUaView();
 
     void findServers();
-    void getEndpoints();
+    void getEndpoints(const QString &serverUrl = "");
+
     void connectToServer();
-    void disconnectFromServer();
+    bool disconnectFromServer();
+    bool isConnected() { return mClientConnected; }
 
 signals:
     void statusMessage(int type, const QString &message);
+    void disconnectedFromServer();
+    void dataChanged(const QStringList& var, const QStringList& data);
 
 private slots:        
     void findServersComplete(const QVector<QOpcUaApplicationDescription> &servers, QOpcUa::UaStatusCode statusCode);   

@@ -2,6 +2,7 @@
 #include "CentralView.h"
 #include "browser/BrowserView.h"
 #include "opcua/OpcUaView.h"
+#include "opcua/OpcUaCheck.h"
 #include "settings/SettingsView.h"
 #include "settings/Settings.h"
 #include "support/controls/StatusIndicator.h"
@@ -41,6 +42,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_centralView(new CentralView(m_browserView, m_opcuaView, m_settingsView, this)),
 
     m_logView(nullptr),
+
+    m_opcuaCheck(nullptr),
 
     m_toolBarButtons(new QButtonGroup(this)),
     m_lastView(CentralView::EView_none),    
@@ -203,9 +206,7 @@ void MainWindow::initializeOdbc()
     else
     {
         m_statusDbs->setOn(true);
-        m_statusDbs->setMsg(cStatusConnect, Qt::green);
-
-        //m_fileView->setView(m_browserView->currentDatabase());
+        m_statusDbs->setMsg(cStatusConnect, Qt::green);        
     }
 
     if (QSqlDatabase::connectionNames().isEmpty())
@@ -233,14 +234,24 @@ void MainWindow::initializeOdbc()
                                   Q_ARG(QString, user),
                                   Q_ARG(QString, pasword));
 #endif
-    }          
+    }
 }
 
 void MainWindow::initializeOpcua()
 {
-    connect(m_opcuaView, SIGNAL(statusMessage(int, const QString &)), this, SLOT(opcuaView_statusMessage(int, const QString &)));
+    QSettings config(Settings::iniFilePath(), QSettings::IniFormat);
+    config.setIniCodec("UTF-8");
 
-    m_opcuaView->getEndpoints();
+    QString server = config.value(QString("opcua/url")).toString();
+
+    connect(m_opcuaView, SIGNAL(statusMessage(int, const QString &)), this, SLOT(opcuaView_statusMessage(int, const QString &)));
+    m_opcuaView->getEndpoints(server);
+
+    //check
+    QUrl url(server);
+    m_opcuaCheck = new OpcUaCheck(url.host(), this);    
+    m_opcuaCheck->setDatabase(m_browserView->currentDatabase());
+    connect(m_opcuaView, &OpcUaView::dataChanged, m_opcuaCheck, &OpcUaCheck::opcuaView_dataChanged);
 }
 
 void MainWindow::browserView_statusMessage(int type, const QString &msg)
@@ -317,14 +328,14 @@ void MainWindow::opcuaView_statusMessage(int type, const QString &msg)
     case MessageType::Connect:
     case MessageType::Enable:
         m_statusOpcua->setOn(true);
-        m_statusOpcua->setMsg(cStatusEnabled, Qt::green);
+        m_statusOpcua->setMsg(cStatusConnect, Qt::green);
 
         qInfo().noquote() << msg;
         break;
     case MessageType::Disconnect:
     case MessageType::Disable:
         m_statusOpcua->setOn(false);
-        m_statusOpcua->setMsg(cStatusDisabled);
+        m_statusOpcua->setMsg(cStatusDisconnect);
 
         qInfo().noquote() << msg;
         break;
@@ -411,4 +422,23 @@ bool addConnectionsFromSettings(BrowserView *browser)
     }
 
     return true;
+}
+
+void MainWindow::applicationQuit()
+{
+    if(m_opcuaView->isConnected())
+    {
+        connect(m_opcuaView, SIGNAL(disconnectedFromServer()), this, SLOT(opcuaView_disconnectedFromServer()));
+
+        m_opcuaView->disconnectFromServer();
+    }
+    else
+    {
+        QApplication::quit();
+    }
+}
+
+void MainWindow::opcuaView_disconnectedFromServer()
+{
+    QApplication::quit();
 }

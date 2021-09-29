@@ -34,15 +34,41 @@ OpcUaView::OpcUaView(const QString &initialUrl, QWidget *parent) :
     mOpcUaProvider(new QOpcUaProvider(this))
 {
     ui->setupUi(this);
-    ui->server->setText(cServerUrl);
+
+    if(initialUrl.isEmpty())
+        ui->server->setText(cServerUrl);
+    else
+        ui->server->setText(initialUrl);
 
     //QTreView
     mOpcUaItemModelSort->setSourceModel(mOpcUaItemModel);
     ui->treeView->setModel(mOpcUaItemModelSort);
-    ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);    
 
     //QTableView
     ui->tableView->setModel(mOpcUaTableModel);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView->verticalHeader()->setVisible(false);
+    ui->tableView->setAlternatingRowColors(true);
+
+    ui->tableView->horizontalHeader()->setSectionResizeMode(OpcUaTableModel::EColumn_DisplayName, QHeaderView::Fixed);
+    ui->tableView->setColumnWidth(OpcUaTableModel::EColumn_DisplayName, 80);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(OpcUaTableModel::EColumn_TimeStamp, QHeaderView::Fixed);
+    ui->tableView->setColumnWidth(OpcUaTableModel::EColumn_TimeStamp, 80);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(OpcUaTableModel::EColumn_BrowseName, QHeaderView::Fixed);
+    ui->tableView->setColumnWidth(OpcUaTableModel::EColumn_BrowseName, 60);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(OpcUaTableModel::EColumn_NodeId, QHeaderView::Fixed);
+    ui->tableView->setColumnWidth(OpcUaTableModel::EColumn_NodeId, 100);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(OpcUaTableModel::EColumn_NodeClass, QHeaderView::Fixed);
+    ui->tableView->setColumnWidth(OpcUaTableModel::EColumn_NodeClass, 60);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(OpcUaTableModel::EColumn_DataType, QHeaderView::Fixed);
+    ui->tableView->setColumnWidth(OpcUaTableModel::EColumn_DataType, 100);
+    ui->tableView->horizontalHeader()->setSectionResizeMode(OpcUaTableModel::EColumn_Description, QHeaderView::Fixed);
+    ui->tableView->setColumnWidth(OpcUaTableModel::EColumn_Description, 100);
+
+    ui->tableView->horizontalHeader()->setSectionResizeMode(OpcUaTableModel::EColumn_Value, QHeaderView::Stretch);
+
+    connect(mOpcUaTableModel, &OpcUaTableModel::itemChanged, this, &OpcUaView::dataChanged);
 
     QStringList backendList = QOpcUaProvider::availableBackends();
     if (backendList.count() == 0)
@@ -162,13 +188,19 @@ void OpcUaView::findServersComplete(const QVector<QOpcUaApplicationDescription> 
     }
 }
 
-void OpcUaView::getEndpoints()
-{
-    const QString serverUrl = ui->server->text();
+void OpcUaView::getEndpoints(const QString &serverUrl)
+{                                     
+    if(!serverUrl.isEmpty())
+    {
+        ui->server->setText(serverUrl);
+    }
+
+    const QString server = ui->server->text();
+
     createClient();
     if(mOpcUaClient)
     {
-        mOpcUaClient->requestEndpoints(serverUrl);
+        mOpcUaClient->requestEndpoints(server);
     }
 }
 
@@ -229,13 +261,15 @@ void OpcUaView::connectToServer()
     }
 }
 
-void OpcUaView::disconnectFromServer()
+bool OpcUaView::disconnectFromServer()
 {
     if (mClientConnected)
     {
         mOpcUaClient->disconnectFromEndpoint();
-        return;
+        return true;
     }
+
+    return false;
 }
 
 void OpcUaView::clientConnected()
@@ -244,6 +278,8 @@ void OpcUaView::clientConnected()
 
     connect(mOpcUaClient, &QOpcUaClient::namespaceArrayUpdated, this, &OpcUaView::namespacesArrayUpdated);
     mOpcUaClient->updateNamespaceArray();
+
+    emit statusMessage(MessageType::Connect, "Connected to server: " + cServerUrl);
 }
 
 void OpcUaView::clientDisconnected()
@@ -254,6 +290,9 @@ void OpcUaView::clientDisconnected()
 
     mOpcUaItemModel->setOpcUaClient(nullptr);
     mOpcUaTableModel->setOpcUaClient(nullptr);
+
+    emit statusMessage(MessageType::Disconnect, "Disconnected from server: " + cServerUrl);
+    emit disconnectedFromServer();
 }
 
 void OpcUaView::namespacesArrayUpdated(const QStringList &namespaceArray)

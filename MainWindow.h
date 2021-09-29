@@ -14,6 +14,7 @@ class MainWindow;
 class BrowserView;
 class CentralView;
 class OpcUaView;
+class OpcUaCheck;
 class SettingsView;
 class StatusIndicator;
 class LogView;
@@ -38,11 +39,14 @@ private:
 
     void createLogWindow(const QString& name, bool showWindow);
 
+    void applicationQuit() override;
+
 private slots:
     void toolBarButtons_buttonClicked(int);
 
     void browserView_statusMessage(int type, const QString &message);
     void opcuaView_statusMessage(int type, const QString &message);
+    void opcuaView_disconnectedFromServer();
 
 private:
     Ui::MainWindow* ui;
@@ -54,6 +58,8 @@ private:
     CentralView*    m_centralView;
 
     LogView*        m_logView;
+
+    OpcUaCheck*     m_opcuaCheck;
 
     QButtonGroup*       m_toolBarButtons;
     CentralView::EView  m_lastView;

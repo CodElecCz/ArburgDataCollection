@@ -16,6 +16,7 @@ SOURCES += main.cpp \
     log/Log.cpp \
     log/LogView.cpp \
     MainWindow.cpp \
+    opcua/OpcUaCheck.cpp \
     opcua/table/OpcUaTableItem.cpp \
     opcua/table/OpcUaTableModel.cpp \
     opcua/tree/OpcUaItemModelSort.cpp \
@@ -39,6 +40,7 @@ HEADERS += \
     log/Log.h \
     log/LogView.h \
     MainWindow.h \
+    opcua/OpcUaCheck.h \
     opcua/table/OpcUaTableItem.h \
     opcua/table/OpcUaTableModel.h \
     opcua/tree/OpcUaItemModelSort.h \
