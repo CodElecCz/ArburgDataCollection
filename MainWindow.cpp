@@ -65,8 +65,16 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 
 MainWindow::~MainWindow()
-{
+{    
     delete ui;
+    delete m_browserView;
+    delete m_opcuaView;
+    delete m_settingsView;
+    delete m_centralView;
+    delete m_toolBarButtons;
+    delete m_statusDbs;
+    delete m_statusOpcua;
+
 }
 
 void MainWindow::initializeMenuBar()

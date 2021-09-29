@@ -7,7 +7,9 @@
 QT_BEGIN_NAMESPACE
 
 class QOpcUaProvider;
-class OpcUaModel;
+class OpcUaItemModel;
+class OpcUaItemModelSort;
+class OpcUaTableModel;
 
 namespace Ui {
 class OpcUaView;
@@ -24,6 +26,7 @@ public:
     void findServers();
     void getEndpoints();
     void connectToServer();
+    void disconnectFromServer();
 
 signals:
     void statusMessage(int type, const QString &message);
@@ -50,7 +53,12 @@ private:
 
 private:    
     Ui::OpcUaView*              ui;
-    OpcUaModel*                 mOpcUaModel;
+    //QTreeView
+    OpcUaItemModel*             mOpcUaItemModel;
+    OpcUaItemModelSort*         mOpcUaItemModelSort;
+    //QTableView
+    OpcUaTableModel*            mOpcUaTableModel;
+
     QOpcUaProvider*             mOpcUaProvider;
     QOpcUaClient*               mOpcUaClient = nullptr;
     QVector<QOpcUaEndpointDescription> mEndpointList;

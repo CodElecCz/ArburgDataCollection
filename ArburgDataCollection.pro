@@ -16,10 +16,13 @@ SOURCES += main.cpp \
     log/Log.cpp \
     log/LogView.cpp \
     MainWindow.cpp \
+    opcua/table/OpcUaTableItem.cpp \
+    opcua/table/OpcUaTableModel.cpp \
+    opcua/tree/OpcUaItemModelSort.cpp \
     opcua/OpcUaView.cpp \
     opcua/certificate/certificatedialog.cpp \
-    opcua/OpcUaModel.cpp \
-    opcua/OpcUaTreeItem.cpp \
+    opcua/tree/OpcUaItemModel.cpp \
+    opcua/tree/OpcUaTreeItem.cpp \
     settings/Settings.cpp \
     settings/SettingsView.cpp \
     support/MainWindowExt.cpp \
@@ -36,10 +39,13 @@ HEADERS += \
     log/Log.h \
     log/LogView.h \
     MainWindow.h \
+    opcua/table/OpcUaTableItem.h \
+    opcua/table/OpcUaTableModel.h \
+    opcua/tree/OpcUaItemModelSort.h \
     opcua/OpcUaView.h \
     opcua/certificate/certificatedialog.h \
-    opcua/OpcUaModel.h \
-    opcua/OpcUaTreeItem.h \
+    opcua/tree/OpcUaItemModel.h \
+    opcua/tree/OpcUaTreeItem.h \
     settings/Settings.h \
     settings/SettingsView.h \
     support/MainWindowExt.h \

@@ -1,5 +1,7 @@
 #include "OpcUaView.h"
-#include "OpcUaModel.h"
+#include "tree/OpcUaItemModel.h"
+#include "tree/OpcUaItemModelSort.h"
+#include "table/OpcUaTableModel.h"
 #include "certificate/certificatedialog.h"
 #include "settings/Settings.h"
 
@@ -26,14 +28,21 @@ QT_BEGIN_NAMESPACE
 OpcUaView::OpcUaView(const QString &initialUrl, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::OpcUaView),
-    mOpcUaModel(new OpcUaModel(this)),
+    mOpcUaItemModel(new OpcUaItemModel(this)),
+    mOpcUaItemModelSort(new OpcUaItemModelSort(this)),
+    mOpcUaTableModel(new OpcUaTableModel(this)),
     mOpcUaProvider(new QOpcUaProvider(this))
 {
     ui->setupUi(this);
     ui->server->setText(cServerUrl);
 
-    ui->treeView->setModel(mOpcUaModel);
+    //QTreView
+    mOpcUaItemModelSort->setSourceModel(mOpcUaItemModel);
+    ui->treeView->setModel(mOpcUaItemModelSort);
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    //QTableView
+    ui->tableView->setModel(mOpcUaTableModel);
 
     QStringList backendList = QOpcUaProvider::availableBackends();
     if (backendList.count() == 0)
@@ -55,9 +64,11 @@ OpcUaView::OpcUaView(const QString &initialUrl, QWidget *parent) :
 }
 
 OpcUaView::~OpcUaView()
-{
+{    
     delete ui;
-    delete mOpcUaModel;
+    delete mOpcUaItemModel;
+    delete mOpcUaItemModelSort;
+    delete mOpcUaTableModel;
     delete mOpcUaProvider;
 }
 
@@ -190,6 +201,11 @@ void OpcUaView::getEndpointsComplete(const QVector<QOpcUaEndpointDescription> &e
                 index++;
             }
         }
+
+        if(index>0)
+        {
+            connectToServer();
+        }
     }
     else //error
     {
@@ -213,6 +229,15 @@ void OpcUaView::connectToServer()
     }
 }
 
+void OpcUaView::disconnectFromServer()
+{
+    if (mClientConnected)
+    {
+        mOpcUaClient->disconnectFromEndpoint();
+        return;
+    }
+}
+
 void OpcUaView::clientConnected()
 {
     mClientConnected = true;    
@@ -226,7 +251,9 @@ void OpcUaView::clientDisconnected()
     mClientConnected = false;
     mOpcUaClient->deleteLater();
     mOpcUaClient = nullptr;
-    mOpcUaModel->setOpcUaClient(nullptr);    
+
+    mOpcUaItemModel->setOpcUaClient(nullptr);
+    mOpcUaTableModel->setOpcUaClient(nullptr);
 }
 
 void OpcUaView::namespacesArrayUpdated(const QStringList &namespaceArray)
@@ -238,7 +265,9 @@ void OpcUaView::namespacesArrayUpdated(const QStringList &namespaceArray)
     }
 
     disconnect(mOpcUaClient, &QOpcUaClient::namespaceArrayUpdated, this, &OpcUaView::namespacesArrayUpdated);
-    mOpcUaModel->setOpcUaClient(mOpcUaClient);    
+
+    mOpcUaItemModel->setOpcUaClient(mOpcUaClient);
+    mOpcUaTableModel->setOpcUaClient(mOpcUaClient);
 }
 
 void OpcUaView::clientError(QOpcUaClient::ClientError error)
