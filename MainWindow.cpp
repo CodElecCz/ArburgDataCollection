@@ -247,10 +247,13 @@ void MainWindow::initializeOpcua()
     connect(m_opcuaView, SIGNAL(statusMessage(int, const QString &)), this, SLOT(opcuaView_statusMessage(int, const QString &)));
     m_opcuaView->getEndpoints(server);
 
-    //check
+    //check    
     QUrl url(server);
     m_opcuaCheck = new OpcUaCheck(url.host(), this);    
-    m_opcuaCheck->setDatabase(m_browserView->currentDatabase());
+
+    QString table = config.value(QString("opcuacheck/table")).toString();
+    m_opcuaCheck->setDatabase(m_browserView->currentDatabase(), table);
+
     connect(m_opcuaView, &OpcUaView::dataChanged, m_opcuaCheck, &OpcUaCheck::opcuaView_dataChanged);
 }
 

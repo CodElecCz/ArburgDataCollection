@@ -17,10 +17,12 @@ class OpcUaTableItem : public QObject
 
 public:
     explicit OpcUaTableItem(OpcUaTableModel *model, QObject* parent = nullptr);
-    OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row, bool changeEvent, QObject* parent = nullptr);
+    OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row, bool changeEvent, int msec = 4000, QObject* parent = nullptr);
     ~OpcUaTableItem();
 
     QVariant data(int column);
+
+    void opcUaRead();
 
 signals:
     void dataChanged();

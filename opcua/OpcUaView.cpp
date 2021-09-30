@@ -15,12 +15,13 @@
 #include <QOpcUaProvider>
 #include <QOpcUaAuthenticationInformation>
 #include <QOpcUaErrorState>
+#include <QTimer>
 
 namespace
 {
     const QString cOpcUaPlugin = "open62541";
     const QString cHostUrl = "opc.tcp://localhost:48040";
-    const QString cServerUrl = "opc.tcp://192.168.11.111:4880/Arburg";
+    const QString cServerUrl = "opc.tcp://192.168.11.111:4880/Arburg";    
 }
 
 QT_BEGIN_NAMESPACE
@@ -31,7 +32,9 @@ OpcUaView::OpcUaView(const QString &initialUrl, QWidget *parent) :
     mOpcUaItemModel(new OpcUaItemModel(this)),
     mOpcUaItemModelSort(new OpcUaItemModelSort(this)),
     mOpcUaTableModel(new OpcUaTableModel(this)),
-    mOpcUaProvider(new QOpcUaProvider(this))
+    mOpcUaProvider(new QOpcUaProvider(this)),
+    mTimerReconnect(new QTimer(this)),
+    mTimerRead(new QTimer(this))
 {
     ui->setupUi(this);
 
@@ -70,6 +73,15 @@ OpcUaView::OpcUaView(const QString &initialUrl, QWidget *parent) :
 
     connect(mOpcUaTableModel, &OpcUaTableModel::itemChanged, this, &OpcUaView::dataChanged);
 
+    //timer reconnect
+    mTimerReconnect->setSingleShot(true);
+    connect(mTimerReconnect, &QTimer::timeout, this, &OpcUaView::timerReconnect_timeout);
+
+    //timer read
+    mTimerRead->setSingleShot(false);
+    connect(mTimerRead, &QTimer::timeout, this, &OpcUaView::timerRead_timeout);
+
+    //OPC UA
     QStringList backendList = QOpcUaProvider::availableBackends();
     if (backendList.count() == 0)
     {        
@@ -280,13 +292,17 @@ void OpcUaView::clientConnected()
     mOpcUaClient->updateNamespaceArray();
 
     emit statusMessage(MessageType::Connect, "Connected to server: " + cServerUrl);
+
+    mTimerRead->start(4000);
 }
 
 void OpcUaView::clientDisconnected()
 {
+    mTimerRead->stop();
+
     mClientConnected = false;
     mOpcUaClient->deleteLater();
-    mOpcUaClient = nullptr;
+    mOpcUaClient = nullptr;       
 
     mOpcUaItemModel->setOpcUaClient(nullptr);
     mOpcUaTableModel->setOpcUaClient(nullptr);
@@ -312,11 +328,37 @@ void OpcUaView::namespacesArrayUpdated(const QStringList &namespaceArray)
 void OpcUaView::clientError(QOpcUaClient::ClientError error)
 {
     qDebug() << "Client error changed" << error;
+
+    if(error==QOpcUaClient::ConnectionError)
+    {
+        mReconnect = true;
+    }
 }
 
 void OpcUaView::clientState(QOpcUaClient::ClientState state)
 {
     qDebug() << "Client state changed" << state;
+
+    if(state==QOpcUaClient::Disconnected && mReconnect)
+    {
+        mReconnect = false;
+
+        qInfo() << "Server reconnectiong in 5s...";
+        mTimerReconnect->start(5000);
+    }
+}
+
+void OpcUaView::timerReconnect_timeout()
+{
+    connectToServer();
+}
+
+void OpcUaView::timerRead_timeout()
+{
+    if(mClientConnected)
+    {
+        mOpcUaTableModel->opcUaRead();
+    }
 }
 
 bool OpcUaView::createPkiPath(const QString &path)

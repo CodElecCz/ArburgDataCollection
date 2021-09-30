@@ -43,7 +43,7 @@ void OpcUaTableModel::setOpcUaClient(QOpcUaClient *client)
         int index = 0;
         foreach(auto node, cNodeList)
         {
-            OpcUaTableItem* item = new OpcUaTableItem(client->node(node.id), this, index, node.changeEvent, this);
+            OpcUaTableItem* item = new OpcUaTableItem(client->node(node.id), this, index, node.changeEvent, -1, this);
             mNodeList.append(item);
             index++;
 
@@ -56,6 +56,14 @@ void OpcUaTableModel::setOpcUaClient(QOpcUaClient *client)
         mNodeList.clear();
     }
     endResetModel();
+}
+
+void OpcUaTableModel::opcUaRead()
+{
+    foreach(auto node, mNodeList)
+    {
+        node->opcUaRead();
+    }
 }
 
 QOpcUaClient *OpcUaTableModel::opcUaClient() const

@@ -20,6 +20,8 @@ public:
     void setOpcUaClient(QOpcUaClient *);
     QOpcUaClient* opcUaClient() const;
 
+    void opcUaRead();
+
     typedef enum _EColumn
     {
         EColumn_DisplayName = 0,

@@ -10,6 +10,7 @@
 OpcUaCheck::OpcUaCheck(const QString& machineId, QObject* parent) :
     QObject(parent),    
     m_db(),
+    m_table(),
     m_machineId(machineId),
     m_ok(0),
     m_nok(0)
@@ -54,12 +55,12 @@ void OpcUaCheck::opcuaView_dataChanged(const QStringList& var, const QStringList
         }
         else if(v=="f087") //nok
         {
-            cycleTime = data.at(index).toUInt();
+            nok = data.at(index).toUInt();
             isNok = true;
         }
         else if(v=="t085") //cycle time
         {
-            nok = data.at(index).toDouble();
+            cycleTime = data.at(index).toDouble();
             isCycleTime = true;
         }
         else if(v=="f052") //item
@@ -85,28 +86,60 @@ void OpcUaCheck::opcuaView_dataChanged(const QStringList& var, const QStringList
         //qInfo().noquote() << "INSERT (" << data.join("; ") << ")";
         bool res = false;
 
-        if(m_lastInsert.isValid())
+        if(m_lastInsert.isValid()) //insert to database
         {
-            //insert to database
             QStringList headers;
             QStringList records;
 
             //datetime
-            headers.append("datetime");
-            records.append(QString("'%1'").arg(now.toString("yyyy-MM-dd hh:mm:ss")));
+            headers.append("\"datetime\"");
+            records.append(QString("'%1'").arg(now.toString("yyyy-MM-dd hh:mm:ss.zzz")));
 
-            headers.append(var);
+            foreach(auto v, var)
+            {
+                headers.append(QString("\"%1\"").arg(v));
+            }
+
             foreach(auto d, data)
             {
                 d = d.remove("\"");
                 records.append(QString("'%1'").arg(d));
             }
 
-            //status
-            headers.append("status");
-            records.append("1");
+            //ok parts
+            int okResult = ok - m_ok;
+            int nokResult = nok - m_nok;
 
-            res = insert(headers, records);
+            if(okResult>0)
+            {
+                QStringList headersOk = headers;
+                QStringList recordsOk = records;
+
+                //status
+                headersOk.append("\"status\"");
+                recordsOk.append("1");
+
+                //pieces
+                headersOk.append("\"pieces\"");
+                recordsOk.append(QString::number(okResult));
+
+                res = insert(headersOk, recordsOk);
+            }
+            if(nokResult>0)
+            {
+                QStringList headersNok = headers;
+                QStringList recordsNok = records;
+
+                //status
+                headersNok.append("\"status\"");
+                recordsNok.append("0");
+
+                //pieces
+                headersNok.append("\"pieces\"");
+                recordsNok.append(QString::number(nokResult));
+
+                res = insert(headersNok, recordsNok);
+            }
         }
         else
             res = true;
@@ -122,7 +155,7 @@ void OpcUaCheck::opcuaView_dataChanged(const QStringList& var, const QStringList
     }
     else
     {
-        qWarning() << "Not all params found for INSERT";
+        qCritical() << "Not all params found for INSERT";
     }
 }
 
@@ -135,11 +168,17 @@ bool OpcUaCheck::insert(const QStringList& headers, const QStringList& records)
     }
 
     QSqlQuery query(m_db);
+
+    if(m_table.isEmpty())
+    {
+        qCritical().noquote() << "No target database table!";
+        return false;
+    }
 /*
- * INSERT INTO data (datetime,f052,f052B,f9007I,t085,f077,f087,status)
- *      VALUES (2021-09-29 17:48:31,'1020245','','MATERIAL:ALCOM PA66 910/1 SLDS,084189 TOPENI FORMY:4x300`C DOBA SUSENI 4h80`C M-11160','29.540000915527344','1972','0',1)
+ * INSERT INTO "660" ("datetime", "f052", "f052B", "f9007I", "t085", "f077", "f087", "status")
+ * VALUES ('2021-09-30 09:06:20', '1020245', '', 'MATERIAL:ALCOM PA66 910/1 SLDS,084189 TOPENI FORMY:4x300`C DOBA SUSENI 4h80`C M-11160', '29.549999237060547', '1644', '0', 1)
  */
-    QString squery = QString("INSERT INTO data (%1) VALUES (%2)").arg(headers.join(", ")).arg(records.join(", "));
+    QString squery = QString("INSERT INTO \"%1\" (%2) VALUES (%3)").arg(m_table).arg(headers.join(", ")).arg(records.join(", "));
     bool ok = query.exec(squery);
     if(!ok)
     {

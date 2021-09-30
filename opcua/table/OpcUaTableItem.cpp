@@ -23,7 +23,7 @@ OpcUaTableItem::OpcUaTableItem(OpcUaTableModel *model, QObject* parent) :
 {
 }
 
-OpcUaTableItem::OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row, bool changeEvent, QObject* parent) :
+OpcUaTableItem::OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row, bool changeEvent, int msec, QObject* parent) :
     QObject(parent),
     mOpcNode(node),
     mModel(model),
@@ -36,9 +36,13 @@ OpcUaTableItem::OpcUaTableItem(QOpcUaNode *node, OpcUaTableModel *model, int row
     connect(mOpcNode.get(), &QOpcUaNode::attributeRead, this, &OpcUaTableItem::handleAttributes);
     connect(mTimer, &QTimer::timeout, this, &OpcUaTableItem::timer_timeout);
 
-    timer_timeout();
-    mTimer->setSingleShot(false);
-    mTimer->start(2000);
+    opcUaRead();
+
+    if(msec>0)
+    {
+        mTimer->setSingleShot(false);
+        mTimer->start(msec);
+    }
 }
 
 OpcUaTableItem::~OpcUaTableItem()
@@ -46,7 +50,8 @@ OpcUaTableItem::~OpcUaTableItem()
     delete mTimer;
 }
 
-void OpcUaTableItem::timer_timeout()
+
+void OpcUaTableItem::opcUaRead()
 {
     if (!mOpcNode->readAttributes( QOpcUa::NodeAttribute::BrowseName
                             | QOpcUa::NodeAttribute::NodeClass
@@ -58,6 +63,11 @@ void OpcUaTableItem::timer_timeout()
     {
         qWarning() << "Reading attributes" << mOpcNode->nodeId() << "failed";
     }
+}
+
+void OpcUaTableItem::timer_timeout()
+{
+    opcUaRead();
 }
 
 QVariant OpcUaTableItem::data(int column)
