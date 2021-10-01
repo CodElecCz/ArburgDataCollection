@@ -284,6 +284,14 @@ bool OpcUaView::disconnectFromServer()
     return false;
 }
 
+void OpcUaView::on_reconnectButton_clicked()
+{
+    disconnectFromServer();
+
+    qInfo() << "Server reconnectiong in 5s...";
+    mTimerReconnect->start(5000);
+}
+
 void OpcUaView::clientConnected()
 {
     mClientConnected = true;    
@@ -291,7 +299,7 @@ void OpcUaView::clientConnected()
     connect(mOpcUaClient, &QOpcUaClient::namespaceArrayUpdated, this, &OpcUaView::namespacesArrayUpdated);
     mOpcUaClient->updateNamespaceArray();
 
-    emit statusMessage(MessageType::Connect, "Connected to server: " + cServerUrl);
+    emit statusMessage(MessageType::Connect, "Connected to server: " + ui->server->text());
 
     mTimerRead->start(4000);
 }
@@ -307,7 +315,7 @@ void OpcUaView::clientDisconnected()
     mOpcUaItemModel->setOpcUaClient(nullptr);
     mOpcUaTableModel->setOpcUaClient(nullptr);
 
-    emit statusMessage(MessageType::Disconnect, "Disconnected from server: " + cServerUrl);
+    emit statusMessage(MessageType::Disconnect, "Disconnected from server: " + ui->server->text());
     emit disconnectedFromServer();
 }
 

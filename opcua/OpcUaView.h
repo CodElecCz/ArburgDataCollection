@@ -51,6 +51,8 @@ private slots:
     void timerReconnect_timeout();
     void timerRead_timeout();
 
+    void on_reconnectButton_clicked();
+
 private:
     void createClient();
 
@@ -71,8 +73,10 @@ private:
     QVector<QOpcUaEndpointDescription> mEndpointList;
     bool                        mClientConnected = false;
     bool                        mReconnect = false;
+
     QTimer*                     mTimerReconnect = nullptr;
     QTimer*                     mTimerRead = nullptr;
+
     QOpcUaApplicationIdentity   m_identity;
     QOpcUaPkiConfiguration      m_pkiConfig;
     QOpcUaEndpointDescription   m_endpoint; // current endpoint used to connect
