@@ -429,19 +429,19 @@ bool addConnectionsFromSettings(BrowserView *browser)
 
 void MainWindow::applicationQuit()
 {
+    //qInfo() << "applicationQuit() " << m_opcuaView->isConnected();
+
     if(m_opcuaView->isConnected())
-    {
-        connect(m_opcuaView, SIGNAL(disconnectedFromServer()), this, SLOT(opcuaView_disconnectedFromServer()));
+    {        
+        QEventLoop loop;
+        connect(m_opcuaView, &OpcUaView::disconnectedFromServer, &loop, &QEventLoop::quit);
 
         m_opcuaView->disconnectFromServer();
+
+        loop.exec();
     }
     else
     {
         QApplication::quit();
     }
-}
-
-void MainWindow::opcuaView_disconnectedFromServer()
-{
-    QApplication::quit();
 }

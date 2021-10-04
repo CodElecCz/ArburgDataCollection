@@ -110,6 +110,18 @@ void OpcUaCheck::opcuaView_dataChanged(const QStringList& var, const QStringList
             int okResult = ok - m_ok;
             int nokResult = nok - m_nok;
 
+            if(okResult<0 || nokResult<0)
+            {
+                qInfo().noquote() << QString("OK:NOK reseted: %1:%2 to %3:%4").arg(m_ok).arg(m_nok).arg(ok).arg(nok);
+
+                okResult = ok;
+                nokResult = nok;
+
+                //store new values
+                m_ok = ok;
+                m_nok = nok;
+            }                        
+
             if(okResult>0)
             {
                 QStringList headersOk = headers;
@@ -124,7 +136,8 @@ void OpcUaCheck::opcuaView_dataChanged(const QStringList& var, const QStringList
                 recordsOk.append(QString::number(okResult));
 
                 res = insert(headersOk, recordsOk);
-            }
+            }           
+
             if(nokResult>0)
             {
                 QStringList headersNok = headers;
@@ -139,9 +152,9 @@ void OpcUaCheck::opcuaView_dataChanged(const QStringList& var, const QStringList
                 recordsNok.append(QString::number(nokResult));
 
                 res = insert(headersNok, recordsNok);
-            }
+            }           
         }
-        else
+        else //no insert in ini file
             res = true;
 
         if(res)
