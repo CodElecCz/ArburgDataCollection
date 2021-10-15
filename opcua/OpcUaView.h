@@ -72,7 +72,7 @@ private:
     QOpcUaClient*               mOpcUaClient = nullptr;
     QVector<QOpcUaEndpointDescription> mEndpointList;
     bool                        mClientConnected = false;
-    bool                        mReconnect = false;
+    uint32_t                    mReconnect = 0;
 
     QTimer*                     mTimerReconnect = nullptr;
     QTimer*                     mTimerRead = nullptr;

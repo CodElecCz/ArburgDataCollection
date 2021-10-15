@@ -22,6 +22,9 @@ namespace
     const QString cOpcUaPlugin = "open62541";
     const QString cHostUrl = "opc.tcp://localhost:48040";
     const QString cServerUrl = "opc.tcp://192.168.11.111:4880/Arburg";    
+
+    const int cReconnect_ConnectionError = 5000;
+    const int cReconnect_BadConnectionClosed = 30000;
 }
 
 QT_BEGIN_NAMESPACE
@@ -213,6 +216,7 @@ void OpcUaView::getEndpoints(const QString &serverUrl)
     if(mOpcUaClient)
     {
         mOpcUaClient->requestEndpoints(server);
+        qInfo() << "Server endpoints request...";
     }
 }
 
@@ -253,7 +257,9 @@ void OpcUaView::getEndpointsComplete(const QVector<QOpcUaEndpointDescription> &e
     }
     else //error
     {
-        emit statusMessage(MessageType::Error, tr("No connection to OPC UA server"));
+        QString msg = QString("No connection to OPC UA server, reconnection in %1s...").arg((double)cReconnect_BadConnectionClosed/1000.0);
+        emit statusMessage(MessageType::Error, msg);
+        mTimerReconnect->start(cReconnect_BadConnectionClosed);
     }
 }
 
@@ -286,10 +292,19 @@ bool OpcUaView::disconnectFromServer()
 
 void OpcUaView::on_reconnectButton_clicked()
 {
-    disconnectFromServer();
+    bool connected = disconnectFromServer();
 
-    qInfo() << "Server reconnectiong in 5s...";
-    mTimerReconnect->start(5000);
+    if(connected)
+    {
+        qInfo() << "Server manual reconnecting in " << (double)cReconnect_ConnectionError/1000.0 << "s...";
+        mTimerReconnect->start(cReconnect_ConnectionError);
+    }
+    else
+    {
+        qInfo() << "Server manual reconnecting";
+        mTimerReconnect->stop();
+        timerReconnect_timeout();
+    }
 }
 
 void OpcUaView::clientConnected()
@@ -339,7 +354,11 @@ void OpcUaView::clientError(QOpcUaClient::ClientError error)
 
     if(error==QOpcUaClient::ConnectionError)
     {
-        mReconnect = true;
+        mReconnect = cReconnect_ConnectionError;
+    }    
+    else
+    {
+        mReconnect = cReconnect_BadConnectionClosed;
     }
 }
 
@@ -347,18 +366,22 @@ void OpcUaView::clientState(QOpcUaClient::ClientState state)
 {
     qDebug() << "Client state changed" << state;
 
-    if(state==QOpcUaClient::Disconnected && mReconnect)
+    if(state==QOpcUaClient::Disconnected && mReconnect>0)
     {
-        mReconnect = false;
+        int msec = mReconnect;
+        mReconnect = 0;
 
-        qInfo() << "Server reconnectiong in 5s...";
-        mTimerReconnect->start(5000);
+        qInfo() << "Server reconnectiong in " << (double)msec/1000.0 << "s...";
+        mTimerReconnect->start(msec);
     }
 }
 
 void OpcUaView::timerReconnect_timeout()
 {
-    connectToServer();
+    if(mEndpointList.size()>0)
+        connectToServer();
+    else
+        getEndpoints();
 }
 
 void OpcUaView::timerRead_timeout()
